@@ -28,7 +28,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   createCategory: async (data: CreateCategoryDto) => {
     const res = await categoryService.create(data);
     if (res.success) {
-      set({ categories: [res.data!, ...(get().categories || [])] });
+      set({ categories: [res.data, ...(get().categories || [])] });
     }
     return res;
   },

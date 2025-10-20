@@ -31,7 +31,7 @@ const CategoryIndex: React.FC<CategoryIndexProps> = ({ stats, categories }) => {
       {/* Content */}
       <div className="w-full lg:flex-1  p-4 overflow-auto">
         {categoryStore.categories.length > 0 ? (
-          <CategoryList categories={categories} />
+          <CategoryList categories={categoryStore.categories ?? []} />
         ) : (
           <CategoryListSkeleton />
         )}{" "}

@@ -54,8 +54,8 @@ export interface CategoryStats {
 }
 
 export interface CategoryState {
-  categories: Category[] | null;
-  categoryStats: CategoryStats | null;
+  categories: Category[];
+  categoryStats: CategoryStats;
 
   setCategories: (categories: Category[]) => void;
   setCategoryStats: (categoryStats: CategoryStats) => void;
