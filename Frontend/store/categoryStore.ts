@@ -1,46 +1,56 @@
 // store/categoryStore.ts
 import { create } from "zustand";
 import { categoryService } from "@/services/categoryService";
+import { ApiResponse } from "@/types/ApiResponse.type";
 import {
   Category,
   CreateCategoryDto,
-  UpdateCategoryDto,
   FilterCategoriesDto,
-  ApiResponse,
+  CategoryStats,
+  CategoryState,
 } from "@/types/Category.type";
 
-interface CategoryState {
-  categories: Category[];
+// interface CategoryState {
+//   categories: Category[];
+//   setCategories: (categories: Category[]) => void;
 
-  /** State updaters */
-  setCategories: (categories: Category[]) => void;
+//   categoryStats: CategoryStats;
+//   setCategoryStats: (categoryStats: CategoryStats) => void;
 
-  /** Fetch all categories with optional filters */
-  getAllCategories: (params?: FilterCategoriesDto) => Promise<void>;
+//   getAllCategories: (params?: FilterCategoriesDto) => Promise<void>;
 
-  /** Fetch a single category by ID */
-  getCategory: (id: number) => Promise<Category | null>;
+//   getCategory: (id: number) => Promise<Category | null>;
 
-  /** Create a new category */
-  createCategory: (data: CreateCategoryDto) => Promise<Category | null>;
+//   createCategory: (data: CreateCategoryDto) => Promise<Category | null>;
 
-  /** Update an existing category */
-  updateCategory: (
-    id: number,
-    data: Partial<UpdateCategoryDto>
-  ) => Promise<Category | null>;
+//   updateCategory: (
+//     id: number,
+//     data: Partial<CreateCategoryDto>
+//   ) => Promise<Category | null>;
 
-  /** Delete a category */
-  deleteCategory: (id: number) => Promise<boolean>;
+//   deleteCategory: (id: number) => Promise<boolean>;
 
-  /** Fetch category stats */
-  getCategoryStats: () => Promise<any | null>;
-}
+//   getCategoryStats: () => Promise<any | null>;
+// }
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
   categories: [],
-
   setCategories: (categories) => set({ categories }),
+
+  categoryStats: {
+    total: 0,
+    income: {
+      total: 0,
+      system: 0,
+      user: 0,
+    },
+    expense: {
+      total: 0,
+      system: 0,
+      user: 0,
+    },
+  },
+  setCategoryStats: (categoryStats) => set({ categoryStats }),
 
   getAllCategories: async (params) => {
     try {

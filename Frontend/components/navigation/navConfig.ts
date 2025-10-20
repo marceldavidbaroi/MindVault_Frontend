@@ -33,6 +33,11 @@ export const navConfig: NavItem[] = [
         href: "/finance/reports",
         description: "Analyze spending trends with detailed visual reports.",
       },
+      {
+        title: "Category",
+        href: "/finance/category",
+        description: "All your transaction categories in one place.",
+      },
     ],
   },
   {

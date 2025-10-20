@@ -36,3 +36,34 @@ export interface Category {
   type: CategoryType;
   createdAt: string;
 }
+
+export interface CategoryStats {
+  total: number;
+  income: {
+    total: number;
+    system: number;
+    user: number;
+  };
+  expense: {
+    total: number;
+    system: number;
+    user: number;
+  };
+}
+
+export interface CategoryState {
+  categories: Category[];
+  categoryStats: CategoryStats;
+
+  setCategories: (categories: Category[]) => void;
+  setCategoryStats: (categoryStats: CategoryStats) => void;
+  getAllCategories: (params?: FilterCategoriesDto) => Promise<void>;
+  getCategory: (id: number) => Promise<Category | null>;
+  createCategory: (data: CreateCategoryDto) => Promise<Category | null>;
+  updateCategory: (
+    id: number,
+    data: Partial<CreateCategoryDto>
+  ) => Promise<Category | null>;
+  deleteCategory: (id: number) => Promise<boolean>;
+  getCategoryStats: () => Promise<any | null>;
+}
