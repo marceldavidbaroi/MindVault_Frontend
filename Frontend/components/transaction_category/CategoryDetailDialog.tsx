@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Category } from "@/types/Category.type";
+import { useCategoryStore } from "@/store/categoryStore";
+import { useNotificationStore } from "@/store/notificationStore";
 
 interface CategoryDialogProps {
   category?: Partial<Category>; // optional for create
@@ -32,6 +34,9 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
   onClose,
   mode,
 }) => {
+  const notify = useNotificationStore((state) => state.setResponse);
+
+  const categoryStore = useCategoryStore();
   const [editedName, setEditedName] = useState(category?.name || "");
   const [editedDisplayName, setEditedDisplayName] = useState(
     category?.displayName || ""
@@ -44,26 +49,39 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
 
   const canEdit = !!category?.user || mode === "create";
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (mode === "create") {
-      console.log("Created category:", {
+      const payload = {
         name: editedName,
         displayName: editedDisplayName,
         type: editedType,
-      });
+      };
+      const res = await categoryStore.createCategory(payload);
+      notify(res);
+      await categoryStore.getCategoryStats();
     } else {
-      console.log("Saved:", {
+      const payload = {
         name: editedName,
         displayName: editedDisplayName,
         type: editedType,
-      });
+      };
+      if (category?.id) {
+        const res = await categoryStore.updateCategory(category.id!, payload);
+        notify(res);
+      }
     }
     onClose();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (category) {
       console.log("Deleted category:", category.id);
+      if (category.id) {
+        const res = await categoryStore.deleteCategory(category.id);
+        notify(res);
+
+        await categoryStore.getCategoryStats();
+      }
       setIsDeleteDialogOpen(false);
       onClose();
     }

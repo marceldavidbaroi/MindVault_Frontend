@@ -2,6 +2,7 @@ import { fetcher } from "@/lib/fetcher";
 import { ENDPOINTS } from "@/config/api";
 import {
   Category,
+  CategoryStats,
   CreateCategoryDto,
   FilterCategoriesDto,
 } from "@/types/Category.type"; // <-- create this types file
@@ -57,5 +58,7 @@ export const categoryService = {
 
   /** GET category stats */
   getStats: () =>
-    fetcher<ApiResponse<any>>(ENDPOINTS.category.stats, { method: "GET" }),
+    fetcher<ApiResponse<CategoryStats>>(ENDPOINTS.category.stats, {
+      method: "GET",
+    }),
 };

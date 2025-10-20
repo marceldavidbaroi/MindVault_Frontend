@@ -1,3 +1,5 @@
+import { ApiResponse } from "./ApiResponse.type";
+
 // ownership can be 'system' (default categories) or 'user' (created by a user)
 export type CategoryOwnership = "system" | "user";
 
@@ -52,18 +54,25 @@ export interface CategoryStats {
 }
 
 export interface CategoryState {
-  categories: Category[];
-  categoryStats: CategoryStats;
+  categories: Category[] | null;
+  categoryStats: CategoryStats | null;
 
   setCategories: (categories: Category[]) => void;
   setCategoryStats: (categoryStats: CategoryStats) => void;
-  getAllCategories: (params?: FilterCategoriesDto) => Promise<void>;
-  getCategory: (id: number) => Promise<Category | null>;
-  createCategory: (data: CreateCategoryDto) => Promise<Category | null>;
+
+  // return ApiResponse<Category[]> instead of void
+  getAllCategories: (
+    params?: FilterCategoriesDto
+  ) => Promise<ApiResponse<Category[]>>;
+
+  getCategory: (id: number) => Promise<ApiResponse<Category>>;
+
+  createCategory: (data: CreateCategoryDto) => Promise<ApiResponse<Category>>;
   updateCategory: (
     id: number,
     data: Partial<CreateCategoryDto>
-  ) => Promise<Category | null>;
-  deleteCategory: (id: number) => Promise<boolean>;
-  getCategoryStats: () => Promise<any | null>;
+  ) => Promise<ApiResponse<Category>>;
+  deleteCategory: (id: number) => Promise<ApiResponse<null>>;
+
+  getCategoryStats: () => Promise<ApiResponse<CategoryStats>>;
 }
