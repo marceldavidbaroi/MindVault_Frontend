@@ -32,7 +32,7 @@ const CategoryStatusCard = ({ data }: { data: SummaryData }) => {
         <CardHeader className="flex items-center justify-between pb-2">
           <CardTitle className="text-base font-semibold text-primary flex items-center gap-2">
             <Wallet className="h-5 w-5 text-primary" />
-            Total Transactions
+            Total Transaction Categories
           </CardTitle>
           <span className="text-xl font-bold">{data.total}</span>
         </CardHeader>

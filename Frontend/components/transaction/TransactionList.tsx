@@ -133,7 +133,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
               >
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-foreground">
-                    {tx.category.displayName}
+                    {tx.category?.displayName}
                   </span>
                   <span className="text-xs text-foreground/70">
                     {new Date(tx.date).toLocaleDateString()}{" "}

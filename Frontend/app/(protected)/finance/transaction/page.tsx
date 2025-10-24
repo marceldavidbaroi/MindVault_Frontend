@@ -1,6 +1,8 @@
 import TransactionIndex from "@/components/transaction/TransactionIndex";
 import { ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
+import { ApiResponse } from "@/types/ApiResponse.type";
+import { Category } from "@/types/Category.type";
 import { cookies } from "next/headers";
 import React from "react";
 
@@ -23,7 +25,18 @@ const TransactionPage = async () => {
     cache: "no-store",
   });
 
-  return <TransactionIndex data={data} />;
+  const categories: ApiResponse<Category[]> = await fetcher(
+    ENDPOINTS.category.all,
+    {
+      method: "GET",
+      headers: {
+        cookie: cookieHeader,
+      },
+      cache: "no-store",
+    }
+  );
+
+  return <TransactionIndex data={data} categoriesData={categories?.data} />;
 };
 
 export default TransactionPage;

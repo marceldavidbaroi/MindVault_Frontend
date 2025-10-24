@@ -8,17 +8,26 @@ import FinancialSummaryCardSkeleton from "./skeleton/FinancialSummaryCardSkeleto
 import WeeklySpendingCardSkeleton from "./skeleton/WeeklySpendingCardSkeleton";
 import { useSummaryStore } from "@/store/summaryStore";
 import TransactionList from "./TransactionList";
+import { useCategoryStore } from "@/store/categoryStore";
 
-const TransactionIndex = ({ data }) => {
+const TransactionIndex = ({ data, categoriesData }) => {
   const { transactionsDashboard, setTransactionDashboard } = useSummaryStore();
+  const { categories, setCategories } = useCategoryStore();
 
   useEffect(() => {
     setTransactionDashboard(data);
   }, [data, setTransactionDashboard]);
 
   useEffect(() => {
+    setCategories(categoriesData);
+  }, [categoriesData, setCategories]);
+
+  useEffect(() => {
     console.log("Updated store:", transactionsDashboard);
   }, [transactionsDashboard]);
+  useEffect(() => {
+    console.log("Updated store:for categories", categoriesData);
+  }, [categoriesData]);
 
   return (
     <div className="min-h-[70vh] p-4 bg-background text-foreground transition-colors duration-300">

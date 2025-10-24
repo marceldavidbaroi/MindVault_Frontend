@@ -130,7 +130,7 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
                     {tx.date}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-foreground/90">
-                    {tx.category.displayName}
+                    {tx.category?.displayName}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell truncate max-w-[200px] text-muted-foreground">
                     {tx.description || "-"}

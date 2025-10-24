@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CreateTransactionDto } from "@/types/Transaction.type";
+import { useCategoryStore } from "@/store/categoryStore";
+import { useTransactionStore } from "@/store/transactionStore";
+import { useSummaryStore } from "@/store/summaryStore";
 
 interface TransactionModalProps {
   open: boolean;
@@ -32,6 +35,9 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   open,
   onClose,
 }) => {
+  const { categories } = useCategoryStore();
+  const { createTransaction, getAllTransactions } = useTransactionStore();
+  const { getTransactionDashboard } = useSummaryStore();
   const [form, setForm] = useState<CreateTransactionDto>({
     type: "income",
     categoryId: 0,
@@ -46,8 +52,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = () => {
-    console.log("Transaction Data:", form);
+  const handleSave = async () => {
+    const response = await createTransaction(form);
+    await getAllTransactions();
+    await getTransactionDashboard();
     onClose();
   };
 
@@ -81,17 +89,26 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
             </Select>
           </div>
 
-          {/* CategoryId */}
+          {/* Category */}
           <div className="flex flex-col gap-1">
-            <Label>Category ID</Label>
-            <Input
-              type="number"
-              value={form.categoryId || ""}
-              onChange={(e) =>
-                handleChange("categoryId", Number(e.target.value))
-              }
-              placeholder="Enter category ID"
-            />
+            <Label>Category</Label>
+            <Select
+              value={form.categoryId ? String(form.categoryId) : ""}
+              onValueChange={(val) => handleChange("categoryId", Number(val))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {(categories ?? [])
+                  .filter((cat) => cat.type === form.type)
+                  .map((cat) => (
+                    <SelectItem key={cat.id} value={String(cat.id)}>
+                      {cat.displayName}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Amount */}
