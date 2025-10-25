@@ -16,6 +16,7 @@ import { ButtonGroup } from "../ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import TransactionModal from "./TransactionModal";
 import BulkTransactionModal from "./BulkTransactionModal";
+import { format } from "date-fns";
 
 interface Transaction {
   id: number;
@@ -47,6 +48,7 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
   };
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  format;
 
   return (
     <div
@@ -133,7 +135,7 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
                   "
                 >
                   <TableCell className="font-medium text-foreground">
-                    {tx.date}
+                    {format(tx.date, "MMMM d, yyyy")}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-foreground/90">
                     {tx.category?.displayName}

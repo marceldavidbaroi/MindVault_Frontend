@@ -14,6 +14,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { format } from "date-fns";
 
 interface Category {
   id: number;
@@ -185,7 +186,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
                       {tx.category?.displayName}
                     </span>
                     <span className="text-xs text-foreground/70">
-                      {new Date(tx.date).toLocaleDateString()}{" "}
+                      {format(tx.date, "MMMM d, yyyy")}{" "}
                       {tx.description && `• ${tx.description}`}
                     </span>
                   </div>
