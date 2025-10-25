@@ -15,6 +15,7 @@ import { Info, Layers, Plus } from "lucide-react";
 import { ButtonGroup } from "../ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import TransactionModal from "./TransactionModal";
+import BulkTransactionModal from "./BulkTransactionModal";
 
 interface Transaction {
   id: number;
@@ -33,16 +34,19 @@ interface Transaction {
 interface TransactionTableProps {
   data: Transaction[];
   loading?: boolean;
+  onInfoClick?: () => void; // ✅ add a callback prop
 }
 
 const TransactionTableMini: React.FC<TransactionTableProps> = ({
   data,
   loading = false,
+  onInfoClick,
 }) => {
   const handleRowClick = (tx: Transaction) => {
     console.log("Clicked transaction:", tx);
   };
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   return (
     <div
@@ -70,12 +74,14 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
           <Button
             variant="default"
             className="bg-secondary text-secondary-foreground"
+            onClick={() => setIsBulkModalOpen(true)}
           >
             <Layers className="w-5 h-5" />
           </Button>
           <Button
             variant="default"
             className="bg-accent text-accent-foreground"
+            onClick={onInfoClick}
           >
             <Info className="w-5 h-5" />
           </Button>
@@ -146,6 +152,12 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
       <TransactionModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+      />
+
+      <BulkTransactionModal
+        open={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        type="expense" // or "income"
       />
     </div>
   );

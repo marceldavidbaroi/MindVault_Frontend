@@ -13,6 +13,7 @@ import { useCategoryStore } from "@/store/categoryStore";
 const TransactionIndex = ({ data, categoriesData }) => {
   const { transactionsDashboard, setTransactionDashboard } = useSummaryStore();
   const { categories, setCategories } = useCategoryStore();
+  const [showList, setShowList] = useState(false);
 
   useEffect(() => {
     setTransactionDashboard(data);
@@ -74,6 +75,7 @@ const TransactionIndex = ({ data, categoriesData }) => {
             <TransactionTableMini
               data={transactionsDashboard.recentTransactions}
               loading={transactionsDashboard.recentTransactions.length === 0}
+              onInfoClick={() => setShowList(!showList)}
             />
           </div>
         </div>
@@ -95,9 +97,11 @@ const TransactionIndex = ({ data, categoriesData }) => {
           )}
         </div>
       </div>
-      <div className="mt-6">
-        <TransactionList />
-      </div>
+      {showList && (
+        <div className="mt-6">
+          <TransactionList />
+        </div>
+      )}
     </div>
   );
 };

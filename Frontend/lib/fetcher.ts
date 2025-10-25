@@ -35,24 +35,53 @@ import { API_BASE_URL } from "@/config/api";
 export async function fetcher<T>(
   url: string,
   options: RequestInit = {},
-  req?: any // SSR request object
+  req?: any
 ): Promise<T> {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(options.headers || {}),
   };
 
-  // Forward cookies for SSR
   if (req?.headers?.cookie) {
     headers["cookie"] = req.headers.cookie;
   }
 
-  const res = await fetch(API_BASE_URL + url, {
+  const fullUrl = API_BASE_URL + url;
+
+  let res = await fetch(fullUrl, {
     ...options,
     headers,
-    credentials: "include", // send cookies automatically in client-side requests
+    credentials: "include",
   });
 
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  // 🔁 Auto-refresh on 401
+  if (res.status === 401) {
+    try {
+      // Attempt to refresh
+      const refreshRes = await fetch(API_BASE_URL + "/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (refreshRes.ok) {
+        // Retry original request once
+        res = await fetch(fullUrl, {
+          ...options,
+          headers,
+          credentials: "include",
+        });
+      } else {
+        throw new Error("Refresh token invalid");
+      }
+    } catch (err) {
+      throw new Error("Session expired. Please log in again.");
+    }
+  }
+
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg || `API error: ${res.status}`);
+  }
+
   return res.json();
 }

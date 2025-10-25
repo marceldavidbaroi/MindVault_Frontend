@@ -23,6 +23,12 @@ export const navConfig: NavItem[] = [
         description: "View and track your daily financial transactions.",
       },
       {
+        title: "Transaction Explorer",
+        href: "/finance/transaction-explorer",
+        description:
+          "Search, filter, and view detailed transactions by date, type, and category.",
+      },
+      {
         title: "Savings Goal",
         href: "/finance/savings-goal",
         description:
