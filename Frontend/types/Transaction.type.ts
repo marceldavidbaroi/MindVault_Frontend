@@ -38,7 +38,7 @@ export interface CreateTransactionDto {
 
 export interface TransactionItemDto {
   categoryId: number;
-  amount: number;
+  amount: number | undefined;
 }
 
 export interface BulkTransactionDto {
@@ -54,6 +54,15 @@ export interface FindTransactionsDto {
   endDate?: string;
   page?: number;
   limit?: number;
+}
+
+export interface SummaryData {
+  title: string;
+  type: "year" | "month" | "today";
+  income: number;
+  expense: number;
+  prevIncome: number;
+  prevExpense: number;
 }
 
 export interface TransactionMeta {

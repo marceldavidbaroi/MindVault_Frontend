@@ -17,30 +17,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import TransactionModal from "./TransactionModal";
 import BulkTransactionModal from "./BulkTransactionModal";
 import { format } from "date-fns";
-
-interface Transaction {
-  id: number;
-  date: string;
-  category: {
-    id: number;
-    name: string;
-    displayName: string;
-    type: string;
-    createdAt: string;
-  };
-  description: string;
-  amount: string;
-}
+import { Transaction } from "@/types/Transaction.type";
+import TransactionTableMiniSkeleton from "./skeleton/TransactionTableMiniSkeleton";
 
 interface TransactionTableProps {
   data: Transaction[];
-  loading?: boolean;
   onInfoClick?: () => void; // ✅ add a callback prop
 }
 
 const TransactionTableMini: React.FC<TransactionTableProps> = ({
   data,
-  loading = false,
   onInfoClick,
 }) => {
   const handleRowClick = (tx: Transaction) => {
@@ -53,7 +39,7 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
   return (
     <div
       className="
-        w-full overflow-x-auto rounded-2xl 
+        w-full  overflow-x-auto rounded-2xl 
         border border-border 
         bg-card/60 backdrop-blur-md 
         shadow-md 
@@ -61,7 +47,7 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
         hover:border-ring/40
       "
     >
-      <div className="flex justify-between items-center p-3">
+      <div className="flex justify-between items-center p-3 ">
         <div className="text-left text-2xl font-bold text-foreground">
           Recent Transactions
         </div>
@@ -106,48 +92,27 @@ const TransactionTableMini: React.FC<TransactionTableProps> = ({
             </TableHead>
           </TableRow>
         </TableHeader>
-
         <TableBody>
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="animate-pulse">
-                  <TableCell>
-                    <Skeleton className="h-4 w-20 bg-muted" />
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Skeleton className="h-4 w-24 bg-muted" />
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Skeleton className="h-4 w-full max-w-[200px] bg-muted" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-16 ml-auto bg-muted" />
-                  </TableCell>
-                </TableRow>
-              ))
-            : data.map((tx) => (
-                <TableRow
-                  key={tx.id}
-                  onClick={() => handleRowClick(tx)}
-                  className="
-                    cursor-pointer transition-colors 
-                    hover:bg-muted/40
-                  "
-                >
-                  <TableCell className="font-medium text-foreground">
-                    {format(tx.date, "MMMM d, yyyy")}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-foreground/90">
-                    {tx.category?.displayName}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell truncate max-w-[200px] text-muted-foreground">
-                    {tx.description || "-"}
-                  </TableCell>
-                  <TableCell className="text-right text-primary font-semibold">
-                    {tx.amount}
-                  </TableCell>
-                </TableRow>
-              ))}
+          {data.map((tx) => (
+            <TableRow
+              key={tx.id}
+              onClick={() => handleRowClick(tx)}
+              className="cursor-pointer transition-colors hover:bg-muted/40"
+            >
+              <TableCell className="font-medium text-foreground">
+                {format(tx.date, "MMMM d, yyyy")}
+              </TableCell>
+              <TableCell className="hidden sm:table-cell text-foreground/90">
+                {tx.category?.displayName}
+              </TableCell>
+              <TableCell className="hidden sm:table-cell truncate max-w-[200px] text-muted-foreground">
+                {tx.description || "-"}
+              </TableCell>
+              <TableCell className="text-right text-primary font-semibold">
+                {tx.amount}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
 

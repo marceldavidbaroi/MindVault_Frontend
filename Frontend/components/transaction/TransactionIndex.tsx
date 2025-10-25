@@ -6,21 +6,37 @@ import TransactionTableMini from "@/components/transaction/TransactionTableMini"
 import WeeklySpendingCard from "@/components/transaction/WeeklySpendingCard";
 import FinancialSummaryCardSkeleton from "./skeleton/FinancialSummaryCardSkeleton";
 import WeeklySpendingCardSkeleton from "./skeleton/WeeklySpendingCardSkeleton";
+import TransactionTableMiniSkeleton from "./skeleton/TransactionTableMiniSkeleton";
 import { useSummaryStore } from "@/store/summaryStore";
 import TransactionList from "./TransactionList";
 import { useCategoryStore } from "@/store/categoryStore";
-
-const TransactionIndex = ({ data, categoriesData }) => {
+import { TransactionSummaryDashboard } from "@/types/Summary.type";
+import { Category } from "@/types/Category.type";
+interface TransactionIndexProps {
+  data: TransactionSummaryDashboard;
+  categoriesData: Category[];
+}
+const TransactionIndex: React.FC<TransactionIndexProps> = ({
+  data,
+  categoriesData,
+}) => {
   const { transactionsDashboard, setTransactionDashboard } = useSummaryStore();
   const { categories, setCategories } = useCategoryStore();
   const [showList, setShowList] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (data) setLoading(false);
+  }, [data]);
 
   useEffect(() => {
     setTransactionDashboard(data);
+    console.log("data", data);
   }, [data, setTransactionDashboard]);
 
   useEffect(() => {
     setCategories(categoriesData);
+    console.log("category data", categoriesData);
   }, [categoriesData, setCategories]);
 
   useEffect(() => {
@@ -71,18 +87,23 @@ const TransactionIndex = ({ data, categoriesData }) => {
           </div>
 
           {/* Bottom: Transaction Table */}
-          <div className="flex-1 overflow-auto bg-card/40 border border-border rounded-xl shadow-sm backdrop-blur-md">
-            <TransactionTableMini
-              data={transactionsDashboard.recentTransactions}
-              loading={transactionsDashboard.recentTransactions.length === 0}
-              onInfoClick={() => setShowList(!showList)}
-            />
+          <div className="flex-1 overflow-auto  rounded-xl shadow-sm ">
+            {loading ? (
+              <TransactionTableMiniSkeleton />
+            ) : (
+              <TransactionTableMini
+                data={transactionsDashboard.recentTransactions}
+                onInfoClick={() => setShowList(!showList)}
+              />
+            )}
           </div>
         </div>
 
         {/* RIGHT SIDE */}
         <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
-          {transactionsDashboard.weekly ? (
+          {loading ? (
+            <WeeklySpendingCardSkeleton />
+          ) : (
             <WeeklySpendingCard
               totalRemainingIncomeAllTime={
                 transactionsDashboard.totalRemainingIncomeAllTime
@@ -92,8 +113,6 @@ const TransactionIndex = ({ data, categoriesData }) => {
               }
               weekly={transactionsDashboard.weekly}
             />
-          ) : (
-            <WeeklySpendingCardSkeleton />
           )}
         </div>
       </div>

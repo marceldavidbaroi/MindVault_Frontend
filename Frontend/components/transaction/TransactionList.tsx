@@ -15,24 +15,26 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { format } from "date-fns";
+import { FindTransactionsDto, Transaction } from "@/types/Transaction.type";
+import { Category } from "@/types/Category.type";
 
-interface Category {
-  id: number;
-  name: string;
-  displayName: string;
-  type: "income" | "expense";
-}
+// interface Category {
+//   id: number;
+//   name: string;
+//   displayName: string;
+//   type: "income" | "expense";
+// }
 
-interface Transaction {
-  id: number;
-  type: "income" | "expense";
-  category: Category;
-  amount: string;
-  date: string;
-  description: string;
-  recurring: boolean;
-  recurringInterval: string | null;
-}
+// interface Transaction {
+//   id: number;
+//   type: "income" | "expense";
+//   category: Category;
+//   amount: string;
+//   date: string;
+//   description: string;
+//   recurring: boolean;
+//   recurringInterval: string | null;
+// }
 
 interface TransactionListProps {
   data?: Transaction[];
@@ -42,8 +44,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
   const transactions = data ?? [];
   const transactionStore = useTransactionStore();
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
 
   const [loading, setLoading] = useState(true); // ✅ Loading state
 
@@ -78,8 +79,13 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
 
   const getAll = async (monthParam: string, yearParam: string) => {
     setLoading(true);
-    const query = getMonthStartAndEndDates(monthParam, yearParam);
-    query.limit = 100;
+    const dates = getMonthStartAndEndDates(monthParam, yearParam);
+    const query: FindTransactionsDto = {
+      startDate: dates.startDate,
+      endDate: dates.endDate,
+      limit: 100,
+    };
+
     await transactionStore.getAllTransactions(query);
     setLoading(false);
   };
@@ -179,7 +185,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
                 <li
                   key={tx.id}
                   className="flex justify-between items-center px-4 py-3 hover:bg-white/10 transition-colors rounded-md cursor-pointer"
-                  onDoubleClick={() => handleDoubleClick(tx)}
+                  onClick={() => handleDoubleClick(tx)}
                 >
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-foreground">

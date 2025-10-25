@@ -9,15 +9,7 @@ import {
   Clock,
   CalendarDays,
 } from "lucide-react";
-
-interface SummaryData {
-  title: string;
-  type: "year" | "month" | "today";
-  income: number;
-  expense: number;
-  prevIncome: number;
-  prevExpense: number;
-}
+import { SummaryData } from "@/types/Transaction.type";
 
 interface FinancialSummaryCardProps {
   data: SummaryData;

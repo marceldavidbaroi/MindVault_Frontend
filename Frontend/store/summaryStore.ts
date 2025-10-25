@@ -1,23 +1,12 @@
 import { create } from "zustand";
 import { summaryService } from "@/services/summaryService";
-
-export interface SummaryDashboard {
-  recentTransactions: any[];
-  summary: any[];
-  totalRemainingIncomeAllTime: number;
-  totalRemainingIncomeThisMonth: number;
-  weekly: {
-    totalSpending: number;
-    breakdown: {
-      day: string;
-      amount: number;
-    }[];
-  };
-}
+import { TransactionSummaryDashboard } from "@/types/Summary.type";
 
 interface SummaryState {
-  transactionsDashboard: SummaryDashboard;
-  setTransactionDashboard: (transactionsDashboard: SummaryDashboard) => void;
+  transactionsDashboard: TransactionSummaryDashboard;
+  setTransactionDashboard: (
+    transactionsDashboard: TransactionSummaryDashboard
+  ) => void;
   getTransactionDashboard: (req?: any) => Promise<void>;
 }
 

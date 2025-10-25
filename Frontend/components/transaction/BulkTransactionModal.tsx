@@ -23,17 +23,10 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useCategoryStore } from "@/store/categoryStore";
 import { Trash } from "lucide-react";
 import { useTransactionStore } from "@/store/transactionStore";
-
-interface TransactionItemDto {
-  categoryId: number;
-  amount?: number;
-}
-
-interface BulkTransactionDto {
-  date: string; // ISO string
-  type: "income" | "expense";
-  transactions: TransactionItemDto[];
-}
+import {
+  BulkTransactionDto,
+  TransactionItemDto,
+} from "@/types/Transaction.type";
 
 interface BulkTransactionModalProps {
   open: boolean;
@@ -96,7 +89,6 @@ const BulkTransactionModal: React.FC<BulkTransactionModalProps> = ({
   };
 
   const handleSave = async () => {
-    e;
     let hasError = false;
     const newErrors = transactions.map((tx) => {
       const err: { categoryId?: string; amount?: string } = {};

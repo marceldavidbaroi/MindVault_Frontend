@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { CreateTransactionDto } from "@/types/Transaction.type";
+import { CreateTransactionDto, Transaction } from "@/types/Transaction.type";
 import { useCategoryStore } from "@/store/categoryStore";
 import { useTransactionStore } from "@/store/transactionStore";
 import { useSummaryStore } from "@/store/summaryStore";
@@ -40,7 +40,7 @@ import { toast } from "sonner";
 interface TransactionModalProps {
   open: boolean;
   onClose: () => void;
-  transaction?: CreateTransactionDto & { id?: number; category?: any };
+  transaction?: Transaction;
 }
 
 const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -136,13 +136,14 @@ const TransactionModal: React.FC<TransactionModalProps> = ({
   };
 
   const confirmDelete = async () => {
-    console.log("Confirmed delete for transaction:", transaction?.id);
-    await deleteTransaction(transaction?.id);
-    await getAllTransactions();
-    await getTransactionDashboard();
-    setShowDeleteConfirm(false);
+    if (transaction?.id) {
+      console.log("Confirmed delete for transaction:", transaction.id);
+      await deleteTransaction(transaction?.id);
+      await getAllTransactions();
+      await getTransactionDashboard();
+      setShowDeleteConfirm(false);
+    }
     resetForm();
-
     onClose();
   };
 
