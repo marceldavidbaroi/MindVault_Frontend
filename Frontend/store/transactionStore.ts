@@ -58,7 +58,13 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const res: ApiResponse<Transaction[]> = await transactionService.getAll(
         params
       );
-      if (res.success) set({ transactions: res.data, meta: res.meta ?? null });
+      console.log("response", res);
+
+      if (res.success) {
+        const meta = res.meta ?? (res as any)?.data?.meta ?? null;
+        set({ transactions: res.data, meta });
+        console.log(meta);
+      }
     } catch (error) {
       console.error("Failed to fetch transactions:", error);
     }
