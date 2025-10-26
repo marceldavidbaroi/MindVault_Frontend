@@ -34,7 +34,7 @@ export default function DynamicNavigationMenu() {
       {/* Logo */}
       <div className="flex items-center gap-2">
         <Image
-          src="/logo.svg"
+          src="/MindVaultLogo.png"
           alt="Logo"
           width={36}
           height={36}
