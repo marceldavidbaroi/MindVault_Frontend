@@ -17,31 +17,15 @@ import {
 import { format } from "date-fns";
 import { FindTransactionsDto, Transaction } from "@/types/Transaction.type";
 import { Category } from "@/types/Category.type";
-
-// interface Category {
-//   id: number;
-//   name: string;
-//   displayName: string;
-//   type: "income" | "expense";
-// }
-
-// interface Transaction {
-//   id: number;
-//   type: "income" | "expense";
-//   category: Category;
-//   amount: string;
-//   date: string;
-//   description: string;
-//   recurring: boolean;
-//   recurringInterval: string | null;
-// }
+import { useRouter } from "next/navigation";
 
 interface TransactionListProps {
   data?: Transaction[];
 }
 
 const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
-  const transactions = data ?? [];
+  const router = useRouter();
+  // const transactions = data ?? [];
   const transactionStore = useTransactionStore();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
@@ -165,8 +149,15 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
         <div className="text-sm text-foreground/60">
           Showing the last 100 transactions for{" "}
           {months.find((m) => m.value === month)?.label}, {year}.{" "}
-          <div className="text-primary cursor-pointer ">
-            Want more details? Go to Transaction Explorer.
+          <div
+            className=" cursor-pointer"
+            onClick={() => router.push("/finance/transaction-explorer")}
+          >
+            Want more details? Go to{" "}
+            <span className="text-primary font-bold">
+              {" "}
+              Transaction Explorer.
+            </span>
           </div>
         </div>
       </CardHeader>
