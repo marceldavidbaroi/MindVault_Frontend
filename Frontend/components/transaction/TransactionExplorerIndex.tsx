@@ -21,14 +21,6 @@ import { Button } from "../ui/button";
 import TransactionModal from "./TransactionModal";
 import BulkTransactionModal from "./BulkTransactionModal";
 import { Category } from "@/types/Category.type";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import PaginationControl from "../common/PaginationControl";
 interface TransactionExplorerIndexProps {
   categories: Category[];

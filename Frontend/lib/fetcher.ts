@@ -55,20 +55,27 @@ export async function fetcher<T>(
   });
 
   // 🔁 Auto-refresh on 401
+  // inside fetcher
   if (res.status === 401) {
     try {
-      // Attempt to refresh
+      // forward cookies for server-side requests
+      const refreshHeaders: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (req?.headers?.cookie) {
+        refreshHeaders["cookie"] = req.headers.cookie; // <-- this is key
+      }
+
       const refreshRes = await fetch(API_BASE_URL + "/auth/refresh", {
         method: "POST",
-        credentials: "include",
+        headers: refreshHeaders,
       });
 
       if (refreshRes.ok) {
-        // Retry original request once
+        // retry original request
         res = await fetch(fullUrl, {
           ...options,
           headers,
-          credentials: "include",
         });
       } else {
         throw new Error("Refresh token invalid");
