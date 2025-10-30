@@ -41,7 +41,11 @@ export interface SecurityQuestion {
 export interface DeleteSecurityQuestionDto {
   password: string;
 }
-
+export interface resetPasswordPasskeyDto {
+  username: string;
+  passkey: string;
+  newPassword: string;
+}
 export interface UserState {
   // ---------------- USER PROFILE ----------------
   user: User | undefined;
@@ -73,4 +77,5 @@ export interface UserState {
   getProfile: () => Promise<ApiResponse<User>>;
   updateProfile: (data: UpdateProfileDto) => Promise<ApiResponse<any>>;
   updatePreference: (data: any) => Promise<ApiResponse<any>>;
+  resetPasswordPasskey: (data: resetPasswordPasskeyDto) => Promise<any>;
 }

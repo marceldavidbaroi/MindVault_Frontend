@@ -4,6 +4,7 @@ import {
   CreateSecurityQuestionDto,
   DeleteSecurityQuestionDto,
   getPasskeyDto,
+  resetPasswordPasskeyDto,
   UpdateProfileDto,
   UserState,
 } from "@/types/User.type";
@@ -94,6 +95,11 @@ export const useUserStore = create<UserState>((set, get) => ({
     if (res.success) {
       await get().getSecurityQuestion(); // refresh after delete
     }
+    return res;
+  },
+
+  resetPasswordPasskey: async (data: resetPasswordPasskeyDto) => {
+    const res = await userService.resetPasswordPasskey(data);
     return res;
   },
 }));

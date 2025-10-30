@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,17 +27,17 @@ export default function SignInPage() {
     e.preventDefault();
     try {
       await authStore.signin(username, password);
-      router.push("/dashboard"); // <-- redirect here
+      router.push("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
     }
   };
 
   return (
-    <Card className="w-full max-w-sm ">
+    <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
         <CardTitle>Login</CardTitle>
-        <CardDescription>Login to continue{authStore.user}</CardDescription>
+        <CardDescription>Login to continue</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -77,6 +77,14 @@ export default function SignInPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </Button>
             </div>
+            {/* Forgot Password Link */}
+            <button
+              type="button"
+              className="text-sm text-right text-primary underline mt-1 self-end"
+              onClick={() => router.push("/auth/forgot")}
+            >
+              Forgot Password?
+            </button>
           </div>
         </form>
       </CardContent>
@@ -93,7 +101,7 @@ export default function SignInPage() {
           >
             Sign Up
           </button>
-        </p>{" "}
+        </p>
       </CardFooter>
     </Card>
   );

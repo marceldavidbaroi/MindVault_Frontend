@@ -7,6 +7,7 @@ export const ENDPOINTS = {
     logout: "/auth/logout",
     me: "/auth/me",
     getPasskey: "/auth/passkey",
+    resetPasswordPasskey: "/auth/passkey/reset",
   },
   summary: {
     transactionDashboard: "/summary/transaction-dashboard",

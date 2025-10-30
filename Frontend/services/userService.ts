@@ -5,7 +5,8 @@ import {
   getPasskeyDto,
   UpdateProfileDto,
   User,
-  DeleteSecurityQuestionDto, // ✅ new DTO for delete (contains password)
+  DeleteSecurityQuestionDto,
+  resetPasswordPasskeyDto, // ✅ new DTO for delete (contains password)
 } from "@/types/User.type";
 
 interface ApiResponse<T> {
@@ -82,5 +83,12 @@ export const userService = {
         body: JSON.stringify(payload), // ✅ send password for verification
       }
     );
+  },
+
+  resetPasswordPasskey: (data: resetPasswordPasskeyDto) => {
+    return fetcher<ApiResponse<any>>(`${ENDPOINTS.auth.resetPasswordPasskey}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
   },
 };
