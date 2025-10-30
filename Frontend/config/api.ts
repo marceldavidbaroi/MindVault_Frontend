@@ -6,6 +6,7 @@ export const ENDPOINTS = {
     signin: "/auth/signin",
     logout: "/auth/logout",
     me: "/auth/me",
+    getPasskey: "/auth/passkey",
   },
   summary: {
     transactionDashboard: "/summary/transaction-dashboard",

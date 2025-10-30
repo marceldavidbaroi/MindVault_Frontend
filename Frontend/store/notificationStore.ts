@@ -1,13 +1,16 @@
-// store/notificationStore.ts
 import { create } from "zustand";
-import { ApiResponse } from "@/types/ApiResponse.type";
+
+export interface ApiResponseNotification {
+  success: boolean;
+  message?: string;
+}
 
 interface NotificationState {
-  response: ApiResponse<any> | null;
-  setResponse: (res: ApiResponse<any> | null) => void; // ✅ allow null
+  response: ApiResponseNotification | null;
+  setResponse: (res: ApiResponseNotification | null) => void;
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
   response: null,
-  setResponse: (res) => set({ response: res }),
+  setResponse: (res) => set({ response: res }), // ✅ wrap in object
 }));

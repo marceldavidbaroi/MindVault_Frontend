@@ -10,6 +10,7 @@ export const ApiResponseToast = () => {
 
   useEffect(() => {
     if (!response) return;
+    console.log(response);
 
     if (response.success) {
       toast.success(response.message || "Success");

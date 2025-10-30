@@ -1,6 +1,6 @@
 import { fetcher } from "@/lib/fetcher";
 import { ENDPOINTS } from "@/config/api";
-import { UpdateProfileDto, User } from "@/types/User.type";
+import { getPasskeyDto, UpdateProfileDto, User } from "@/types/User.type";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -28,6 +28,12 @@ export const userService = {
   updatePreference: (data: any) => {
     return fetcher<ApiResponse<any>>(`${ENDPOINTS.user.updateProfile}`, {
       method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  getPasskey: (data: getPasskeyDto) => {
+    return fetcher<ApiResponse<any>>(`${ENDPOINTS.auth.getPasskey}`, {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },

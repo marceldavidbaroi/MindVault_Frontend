@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/config/api";
+import { useNotificationStore } from "@/store/notificationStore";
 
 /**
  * 🔹 Universal Fetch Wrapper (Client + SSR / Server Components)
@@ -42,53 +43,72 @@ export async function fetcher<T>(
     ...(options.headers || {}),
   };
 
-  if (req?.headers?.cookie) {
-    headers["cookie"] = req.headers.cookie;
-  }
+  if (req?.headers?.cookie) headers["cookie"] = req.headers.cookie;
 
   const fullUrl = API_BASE_URL + url;
+  const { setResponse } = useNotificationStore.getState(); // notification setter
 
-  let res = await fetch(fullUrl, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  let res: Response;
 
-  // 🔁 Auto-refresh on 401
-  // inside fetcher
-  if (res.status === 401) {
-    try {
-      // forward cookies for server-side requests
-      const refreshHeaders: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-      if (req?.headers?.cookie) {
-        refreshHeaders["cookie"] = req.headers.cookie; // <-- this is key
-      }
+  try {
+    res = await fetch(fullUrl, { ...options, headers, credentials: "include" });
 
-      const refreshRes = await fetch(API_BASE_URL + "/auth/refresh", {
-        method: "POST",
-        headers: refreshHeaders,
-      });
+    // Auto-refresh on 401
+    if (res.status === 401) {
+      try {
+        const refreshHeaders: HeadersInit = {
+          "Content-Type": "application/json",
+        };
+        if (req?.headers?.cookie) refreshHeaders["cookie"] = req.headers.cookie;
 
-      if (refreshRes.ok) {
+        const refreshRes = await fetch(API_BASE_URL + "/auth/refresh", {
+          method: "POST",
+          headers: refreshHeaders,
+        });
+
+        if (!refreshRes.ok)
+          throw new Error("Session expired. Please log in again.");
+
         // retry original request
         res = await fetch(fullUrl, {
           ...options,
           headers,
+          credentials: "include",
         });
-      } else {
-        throw new Error("Refresh token invalid");
+      } catch (err: any) {
+        setResponse({
+          success: false,
+          message: err.message || "Session expired. Please log in again.",
+        });
+        throw err;
       }
-    } catch (err) {
-      throw new Error("Session expired. Please log in again.");
     }
-  }
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `API error: ${res.status}`);
-  }
+    if (!res.ok) {
+      let msg: string;
+      try {
+        const errorData = await res.json(); // parse JSON error
+        msg = errorData?.message || `API error: ${res.status}`;
+      } catch {
+        msg = await res.text(); // fallback to text
+      }
 
-  return res.json();
+      setResponse({
+        success: false,
+        message: msg,
+      });
+
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+    if (data?.message) setResponse({ success: true, message: data.message }); // success message
+    return data;
+  } catch (err: any) {
+    setResponse({
+      success: false,
+      message: err.message || "Something went wrong",
+    });
+    throw err;
+  }
 }

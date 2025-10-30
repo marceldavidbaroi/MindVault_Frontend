@@ -1,11 +1,14 @@
 // store/categoryStore.ts
 import { create } from "zustand";
-import { UpdateProfileDto, UserState } from "@/types/User.type";
+import { getPasskeyDto, UpdateProfileDto, UserState } from "@/types/User.type";
 import { userService } from "@/services/userService";
 
 export const useUserStore = create<UserState>((set, get) => ({
   user: undefined,
   setUser: (user) => set({ user }),
+  passkey: undefined,
+  setPasskey: (passkey) => set({ passkey }),
+
   getProfile: async () => {
     const res = await userService.get();
     if (res.success) {
@@ -21,11 +24,20 @@ export const useUserStore = create<UserState>((set, get) => ({
     if (res.success) {
       await get().getProfile();
     }
+    return res;
   },
   updatePreference: async (data: UpdateProfileDto) => {
     const res = await userService.updatePreference(data);
     if (res.success) {
       await get().getProfile();
     }
+    return res;
+  },
+  getPasskey: async (data: getPasskeyDto) => {
+    const res = await userService.getPasskey(data);
+    if (res.success) {
+      set({ passkey: res.data.passkey });
+    }
+    return res;
   },
 }));

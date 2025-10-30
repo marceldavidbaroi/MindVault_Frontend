@@ -9,7 +9,6 @@ export interface User {
   id: number;
   email: string;
   username: string;
-  passkey: string;
   passkeyExpiresAt: Date | null;
   hasSecurityQuestions: boolean;
   isActive: boolean;
@@ -21,10 +20,16 @@ export interface User {
 export interface UpdateProfileDto {
   email: string;
 }
+export interface getPasskeyDto {
+  password: string;
+}
 export interface UserState {
   user: User | undefined;
+  passkey: string | undefined;
   setUser: (user: User) => void;
+  setPasskey: (passkey: string) => void;
   getProfile: () => Promise<ApiResponse<User>>;
-  updateProfile: (data: UpdateProfileDto) => void;
-  updatePreference: (data: any) => void;
+  updateProfile: (data: UpdateProfileDto) => Promise<ApiResponse<any>>;
+  updatePreference: (data: any) => Promise<ApiResponse<any>>;
+  getPasskey: (data: getPasskeyDto) => Promise<ApiResponse<any>>;
 }

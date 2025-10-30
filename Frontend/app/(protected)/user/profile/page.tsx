@@ -1,3 +1,4 @@
+import UserIndex from "@/components/user/UserIndex";
 import { ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { ApiResponse } from "@/types/ApiResponse.type";
@@ -23,8 +24,7 @@ const ProfilePage = async () => {
 
   return (
     <>
-      <div>ProfilePage</div>
-      {JSON.stringify(profile)}
+      <UserIndex user={profile.data} />
     </>
   );
 };

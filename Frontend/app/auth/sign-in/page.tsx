@@ -19,8 +19,8 @@ import { useAuthStore } from "@/store/authStore";
 export default function SignInPage() {
   const authStore = useAuthStore();
   const router = useRouter();
-  const [username, setUsername] = useState("david");
-  const [password, setPassword] = useState("David1234@");
+  const [username, setUsername] = useState("David");
+  const [password, setPassword] = useState("David@123");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
