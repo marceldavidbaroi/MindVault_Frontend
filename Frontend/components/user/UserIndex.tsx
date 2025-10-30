@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { User2, Key, Shield } from "lucide-react"; // Lucide icons
 import { useUserStore } from "@/store/userStore";
-import ShowPasskeyModal from "./dialogs/showPasskeyModal";
+import ShowPasskeyModal from "./dialogs/ShowPasskeyModal";
+import UpdateProfileModal from "./dialogs/UpdateProfileModal";
+import SecurityQuestionsSection from "./dialogs/SecurityQuestionsPanel";
 
 interface UserIndexProps {
   user: User;
@@ -21,18 +23,22 @@ const UserIndex = ({ user }: UserIndexProps) => {
   }, [user]);
 
   const [showPass, setShowPass] = useState<boolean>(false);
+  const [showUpdateProfile, setShowUpdateProfile] = useState<boolean>(false);
+  const [showSecurityQuestionPanel, setShowSecurityQuestionPanel] =
+    useState<boolean>(false);
 
-  const handleUpdateProfile = () =>
-    console.log("Update profile clicked for", userStore.user?.username);
+  const handleUpdateProfile = () => {
+    setShowUpdateProfile(true);
+  };
   const handleShowPasskey = () => {
     setShowPass(true);
   };
-  const handleAddOrEditSecurityQuestion = () =>
-    console.log(
-      userStore.user?.hasSecurityQuestions
-        ? "Update security questions clicked"
-        : "Add security questions clicked"
-    );
+  const handleAddOrEditSecurityQuestion = async () => {
+    if (userStore.securityQuestions.length === 0) {
+      await userStore.getSecurityQuestion();
+    }
+    setShowSecurityQuestionPanel(!showSecurityQuestionPanel);
+  };
 
   return (
     <div className="space-y-12 p-8 bg-background rounded-lg">
@@ -118,9 +124,20 @@ const UserIndex = ({ user }: UserIndexProps) => {
               <Badge variant="outline">Set</Badge>
             )}
           </div>
+          <div>
+            {showSecurityQuestionPanel && (
+              <SecurityQuestionsSection
+                data={userStore.securityQuestions ?? []}
+              />
+            )}
+          </div>
         </div>
       </section>
       <ShowPasskeyModal open={showPass} onClose={() => setShowPass(false)} />
+      <UpdateProfileModal
+        open={showUpdateProfile}
+        onClose={() => setShowUpdateProfile(false)}
+      />
     </div>
   );
 };

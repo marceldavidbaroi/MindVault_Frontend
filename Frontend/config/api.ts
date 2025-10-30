@@ -32,4 +32,10 @@ export const ENDPOINTS = {
     updateProfile: "/profile",
     updatePreference: "/profile/preference",
   },
+  securityQuestions: {
+    get: "/security-questions",
+    create: "/security-questions",
+    update: (id: number | string) => `/security-questions/${id}`,
+    delete: (id: number | string) => `/security-questions/${id}`,
+  },
 };
