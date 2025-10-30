@@ -26,4 +26,9 @@ export const ENDPOINTS = {
     remove: (id: number | string) => `/categories/${id}`, // DELETE category
     stats: "/categories/stats/all", // GET category stats
   },
+  user: {
+    profile: "/profile",
+    updateProfile: "/profile",
+    updatePreference: "/profile/preference",
+  },
 };

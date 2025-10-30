@@ -68,12 +68,12 @@ export const navConfig: NavItem[] = [
     subItems: [
       {
         title: "Profile",
-        href: "/me/profile",
+        href: "/user/profile",
         description: "View and edit your profile information.",
       },
       {
         title: "Settings",
-        href: "/me/settings",
+        href: "/user/settings",
         description: "Customize your experience and manage preferences.",
       },
       {
