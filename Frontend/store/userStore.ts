@@ -1,12 +1,14 @@
 // store/userStore.ts
 import { create } from "zustand";
 import {
+  changePasswordDto,
   CreateSecurityQuestionDto,
   DeleteSecurityQuestionDto,
   getPasskeyDto,
   resetPasswordPasskeyDto,
   UpdateProfileDto,
   UserState,
+  VerifyAnswerDto,
 } from "@/types/User.type";
 import { userService } from "@/services/userService";
 
@@ -100,6 +102,20 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   resetPasswordPasskey: async (data: resetPasswordPasskeyDto) => {
     const res = await userService.resetPasswordPasskey(data);
+    return res;
+  },
+
+  changePassword: async (data: changePasswordDto) => {
+    const res = await userService.changePassword(data);
+    return res;
+  },
+
+  forgetPassQuestions: async (query) => {
+    const res = await userService.getQuestions(query);
+    return res;
+  },
+  verifyAnswer: async (data: VerifyAnswerDto) => {
+    const res = await userService.answerVerify(data);
     return res;
   },
 }));

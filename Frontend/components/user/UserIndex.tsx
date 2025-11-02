@@ -10,6 +10,7 @@ import { useUserStore } from "@/store/userStore";
 import ShowPasskeyModal from "./dialogs/ShowPasskeyModal";
 import UpdateProfileModal from "./dialogs/UpdateProfileModal";
 import SecurityQuestionsSection from "./dialogs/SecurityQuestionsPanel";
+import ChangePasswordModal from "./dialogs/ChangePasswordModal";
 
 interface UserIndexProps {
   user: User;
@@ -38,6 +39,13 @@ const UserIndex = ({ user }: UserIndexProps) => {
       await userStore.getSecurityQuestion();
     }
     setShowSecurityQuestionPanel(!showSecurityQuestionPanel);
+  };
+
+  // Add this state hook at the top with other states
+  const [showChangePassword, setShowChangePassword] = useState<boolean>(false);
+
+  const handleChangePassword = () => {
+    setShowChangePassword(true);
   };
 
   return (
@@ -103,7 +111,19 @@ const UserIndex = ({ user }: UserIndexProps) => {
             )} */}
           </div>
         </div>
-
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Update your account password regularly to keep your account secure.
+          </p>
+          <Button
+            size="sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
+            onClick={handleChangePassword}
+          >
+            <Key className="w-4 h-4" />
+            Change Password
+          </Button>
+        </div>
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
             If you lost your passkey, set up up to three security questions to
@@ -124,6 +144,11 @@ const UserIndex = ({ user }: UserIndexProps) => {
               <Badge variant="outline">Set</Badge>
             )}
           </div>
+
+          <ChangePasswordModal
+            open={showChangePassword}
+            onClose={() => setShowChangePassword(false)}
+          />
           <div>
             {showSecurityQuestionPanel && (
               <SecurityQuestionsSection

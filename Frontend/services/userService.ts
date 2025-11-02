@@ -6,7 +6,9 @@ import {
   UpdateProfileDto,
   User,
   DeleteSecurityQuestionDto,
-  resetPasswordPasskeyDto, // ✅ new DTO for delete (contains password)
+  resetPasswordPasskeyDto,
+  VerifyAnswerDto,
+  changePasswordDto, // ✅ new DTO for delete (contains password)
 } from "@/types/User.type";
 
 interface ApiResponse<T> {
@@ -88,6 +90,24 @@ export const userService = {
   resetPasswordPasskey: (data: resetPasswordPasskeyDto) => {
     return fetcher<ApiResponse<any>>(`${ENDPOINTS.auth.resetPasswordPasskey}`, {
       method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  changePassword: (data: changePasswordDto) => {
+    return fetcher<ApiResponse<any>>(`${ENDPOINTS.auth.changePassword}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+  getQuestions: (query: string) => {
+    return fetcher<ApiResponse<any>>(`${ENDPOINTS.auth.getQuestions(query)}`, {
+      method: "GET",
+    });
+  },
+  answerVerify: (data: VerifyAnswerDto) => {
+    return fetcher<ApiResponse<any>>(`${ENDPOINTS.auth.answerVerify}`, {
+      method: "GET",
       body: JSON.stringify(data),
     });
   },

@@ -46,6 +46,19 @@ export interface resetPasswordPasskeyDto {
   passkey: string;
   newPassword: string;
 }
+export interface changePasswordDto {
+  oldPassword: string;
+  newPassword: string;
+}
+export interface VerifyAnswerDto {
+  username: string;
+  answers: {
+    questionId: number;
+    answer: string;
+  }[];
+  newPassword: string;
+}
+
 export interface UserState {
   // ---------------- USER PROFILE ----------------
   user: User | undefined;
@@ -78,4 +91,7 @@ export interface UserState {
   updateProfile: (data: UpdateProfileDto) => Promise<ApiResponse<any>>;
   updatePreference: (data: any) => Promise<ApiResponse<any>>;
   resetPasswordPasskey: (data: resetPasswordPasskeyDto) => Promise<any>;
+  forgetPassQuestions: (query: string) => Promise<any>;
+  verifyAnswer: (data: VerifyAnswerDto) => Promise<any>;
+  changePassword: (data: changePasswordDto) => Promise<any>;
 }
