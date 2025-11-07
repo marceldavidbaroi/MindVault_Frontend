@@ -24,7 +24,7 @@ export const ApiResponseToast = () => {
 
   return (
     <Toaster
-      position="top-center"
+      position="bottom-left"
       richColors
       closeButton
       expand

@@ -26,12 +26,12 @@ export const ENDPOINTS = {
     remove: (id: number | string) => `/transactions/${id}`, // DELETE transaction
   },
   category: {
-    all: "/categories", // GET all categories (with optional filters)
-    getOne: (id: number | string) => `/categories/${id}`, // GET single category
-    create: "/categories", // POST create category
-    update: (id: number | string) => `/categories/${id}`, // PATCH update category
-    remove: (id: number | string) => `/categories/${id}`, // DELETE category
-    stats: "/categories/stats/all", // GET category stats
+    all: "/finance/categories", // GET all categories (with optional filters)
+    getOne: (id: number | string) => `/finance/categories/${id}`, // GET single category
+    create: "/finance/categories", // POST create category
+    update: (id: number | string) => `/finance/categories/${id}`, // PATCH update category
+    remove: (id: number | string) => `/finance/categories/${id}`, // DELETE category
+    stats: "/finance/categories/stats/all", // GET category stats
   },
   user: {
     profile: "/profile",

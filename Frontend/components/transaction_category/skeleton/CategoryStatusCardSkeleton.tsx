@@ -5,38 +5,50 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const CategoryStatusCardSkeleton = () => {
   const renderSkeletonCard = () => (
-    <Card className="bg-card border border-border shadow flex-1 min-w-[220px] animate-pulse">
-      <CardHeader className="flex items-center justify-between pb-2">
-        <CardTitle className="h-5 w-32 bg-gray-300 rounded" />
-        <span className="h-6 w-12 bg-gray-300 rounded" />
+    // Total Card Skeleton (Dense - No detailed content)
+    <Card className="bg-card border border-border shadow flex-1 min-w-[180px] animate-pulse">
+      {/* Matching dense header style (p-3) */}
+      <CardHeader className="p-3 flex flex-row items-center justify-between space-y-0">
+        {/* Placeholder for Title (Total Categories) */}
+        <div className="h-4 w-24 bg-gray-300 rounded-sm" />
+        {/* Placeholder for Value (Total Count) */}
+        <div className="h-6 w-10 bg-gray-300 rounded-sm" />
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="h-4 w-full bg-gray-200 rounded" />
-      </CardContent>
+      {/* Note: CardContent is removed to match the density of the actual Total Card */}
     </Card>
   );
 
   const renderSkeletonCardWithDetails = () => (
-    <Card className="flex-1 min-w-[220px] border border-border shadow animate-pulse">
-      <CardHeader className="flex items-center justify-between pb-2">
-        <CardTitle className="h-5 w-32 bg-gray-300 rounded" />
-        <span className="h-6 w-12 bg-gray-300 rounded" />
+    // Income/Expense Card Skeleton (Dense - with two detail lines)
+    <Card className="flex-1 min-w-[180px] border border-border shadow animate-pulse">
+      {/* Matching dense header style (p-3) */}
+      <CardHeader className="p-3 flex flex-row items-center justify-between space-y-0">
+        {/* Placeholder for Title (Income/Expense Categories) */}
+        <div className="h-4 w-24 bg-gray-300 rounded-sm" />
+        {/* Placeholder for Value (Income/Expense Total) */}
+        <div className="h-6 w-10 bg-gray-300 rounded-sm" />
       </CardHeader>
-      <CardContent className="space-y-2">
+      {/* Matching dense content style (p-3 pt-0, small text/gap) */}
+      <CardContent className="p-3 pt-0 space-y-1">
+        {/* Detail Line 1 (System) */}
         <div className="flex justify-between">
-          <span className="h-4 w-20 bg-gray-200 rounded" />
-          <span className="h-4 w-12 bg-gray-200 rounded" />
+          <div className="h-3 w-12 bg-gray-200 rounded-sm" />
+          <div className="h-3 w-8 bg-gray-200 rounded-sm" />
         </div>
+        {/* Detail Line 2 (User Defined) */}
         <div className="flex justify-between">
-          <span className="h-4 w-20 bg-gray-200 rounded" />
-          <span className="h-4 w-12 bg-gray-200 rounded" />
+          <div className="h-3 w-14 bg-gray-200 rounded-sm" />
+          <div className="h-3 w-8 bg-gray-200 rounded-sm" />
         </div>
       </CardContent>
     </Card>
   );
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:justify-between lg:flex-col">
+    <div
+      // Enforce horizontal row, allow overflow-x-auto, and use gap-3
+      className="flex flex-row justify-start w-full gap-3 overflow-x-auto pb-2"
+    >
       {renderSkeletonCard()} {/* Total */}
       {renderSkeletonCardWithDetails()} {/* Income */}
       {renderSkeletonCardWithDetails()} {/* Expense */}
