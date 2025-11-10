@@ -6,6 +6,7 @@ import {
   CreateAccountDto,
   UpdateAccountDto,
   AssignRoleDto,
+  AccessAccount,
 } from "@/types/Account.type";
 
 interface ApiResponse<T> {
@@ -35,7 +36,7 @@ export const accountService = {
 
   /** GET accounts with roles for current user */
   getWithAccess: () =>
-    fetcher<ApiResponse<Account[]>>(ENDPOINTS.accounts.access, {
+    fetcher<ApiResponse<AccessAccount[]>>(ENDPOINTS.accounts.access, {
       method: "GET",
     }),
 

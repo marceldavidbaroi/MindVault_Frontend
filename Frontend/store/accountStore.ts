@@ -8,14 +8,17 @@ import {
   UpdateAccountDto,
   AssignRoleDto,
   AccountRole,
+  AccessAccount,
 } from "@/types/Account.type";
 
 interface AccountState {
   accounts: Account[];
+  accessAccounts: AccessAccount[];
   accountTypes: AccountType[];
   accountRoles: Record<number, AccountRole[]>; // key = accountId
 
   setAccounts: (accounts: Account[]) => void;
+  setAccessAccounts: (accounts: AccessAccount[]) => void;
   setAccountTypes: (types: AccountType[]) => void;
   setAccountRoles: (accountId: number, roles: AccountRole[]) => void;
 
@@ -40,10 +43,12 @@ interface AccountState {
 
 export const useAccountStore = create<AccountState>((set, get) => ({
   accounts: [],
+  accessAccounts: [],
   accountTypes: [],
   accountRoles: {},
 
   setAccounts: (accounts) => set({ accounts }),
+  setAccessAccounts: (accessAccounts) => set({ accessAccounts }),
   setAccountTypes: (accountTypes) => set({ accountTypes }),
   setAccountRoles: (accountId, roles) =>
     set({ accountRoles: { ...get().accountRoles, [accountId]: roles } }),
@@ -57,7 +62,7 @@ export const useAccountStore = create<AccountState>((set, get) => ({
 
   getAccountsWithAccess: async () => {
     const res = await accountService.getWithAccess();
-    if (res.success) set({ accounts: res.data });
+    if (res.success) set({ accessAccounts: res.data });
     return res;
   },
 

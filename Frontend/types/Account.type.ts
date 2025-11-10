@@ -1,5 +1,7 @@
 // types/Account.type.ts
 
+import { Currency } from "./Currency.type";
+
 /** Account Type entity */
 export interface AccountType {
   id: number;
@@ -10,13 +12,31 @@ export interface AccountType {
 }
 
 /** Account entity */
+
 export interface Account {
   id: number;
   name: string;
   description?: string;
   balance: string; // API returns balance as string
   type: AccountType;
-  currencyCode?: string;
+  currencyCode?: Partial<Currency> | null;
+}
+export interface AccessAccount {
+  id: number;
+  account: {
+    id: number;
+    name: string;
+    description: string;
+    initialBalance: string;
+    balance: string;
+    ownerId: number;
+  };
+  role: {
+    id: number;
+    name: string;
+    displayName: string;
+    description: string;
+  };
 }
 
 /** DTO for creating an account */
