@@ -47,4 +47,8 @@ export const ENDPOINTS = {
   currency: {
     get: "/finance/currencies",
   },
+  roles: {
+    getAll: "/roles",
+    getOne: (id: number | string) => `/roles/${id}`,
+  },
 };

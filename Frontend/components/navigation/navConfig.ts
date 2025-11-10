@@ -81,9 +81,32 @@ export const navConfig: NavItem[] = [
         description: "Customize your experience and manage preferences.",
       },
       {
+        title: "System Role Configs",
+        href: "/user/system-role-configs",
+        description:
+          "See what each system role can do — permissions and access levels across the app.",
+      },
+      {
         title: "Logout",
         href: "/auth/logout",
         description: "Sign out of your MindVault account.",
+      },
+    ],
+  },
+  {
+    title: "About",
+    description: "Learn more about this app and its vision.",
+    subItems: [
+      {
+        title: "App Overview",
+        href: "/about/app-overview",
+        description:
+          "Discover what MindVault is all about — your all-in-one productivity and finance companion.",
+      },
+      {
+        title: "System Roles",
+        href: "/about/system-roles",
+        description: "All the system declared roles.",
       },
     ],
   },
