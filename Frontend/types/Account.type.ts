@@ -1,0 +1,76 @@
+// types/Account.type.ts
+
+/** Account Type entity */
+export interface AccountType {
+  id: number;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  scope: "personal" | "business" | "family" | "shared"; // as per your data
+}
+
+/** Account entity */
+export interface Account {
+  id: number;
+  name: string;
+  description?: string;
+  balance: string; // API returns balance as string
+  type: AccountType;
+  currencyCode?: string;
+}
+
+/** DTO for creating an account */
+export interface CreateAccountDto {
+  name: string;
+  description?: string;
+  initialBalance: number;
+  accountTypeId: number;
+  currencyCode: string;
+}
+
+/** DTO for updating an account */
+export interface UpdateAccountDto {
+  name?: string;
+  description?: string;
+  accountTypeId?: number;
+  currencyCode?: string;
+}
+
+/** User assigned to an account */
+export interface AccountUser {
+  id: number;
+  username: string;
+  email?: string | null;
+  isActive: boolean;
+}
+
+/** Role entity */
+export interface Role {
+  id: number;
+  name: string;
+  displayName: string;
+  description?: string;
+}
+
+/** Account Role mapping */
+export interface AccountRole {
+  id: number;
+  user: AccountUser;
+  role: Role;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** DTO for assigning/updating a user role for an account */
+export interface AssignRoleDto {
+  userId: number;
+  role: string; // role name or role ID depending on backend implementation
+}
+
+/** Filters for fetching accounts */
+export interface FilterAccountsDto {
+  search?: string;
+  typeId?: number;
+  page?: number;
+  limit?: number;
+}

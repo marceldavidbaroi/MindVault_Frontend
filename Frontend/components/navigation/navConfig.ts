@@ -13,29 +13,17 @@ export const navConfig: NavItem[] = [
   },
   {
     title: "Finance",
-    description: "Manage transactions, savings goals, and reports.",
+    description: "Manage transactions, savings goals, accounts, and reports.",
     subItems: [
       {
-        title: "Transactions",
-        href: "/finance/transaction",
-        description: "View and track your daily financial transactions.",
+        title: "Accounts",
+        href: "/finance/accounts",
+        description: "View, create, and manage all accounts.",
       },
       {
-        title: "Transaction Explorer",
-        href: "/finance/transaction-explorer",
-        description:
-          "Search, filter, and view detailed transactions by date, type, and category.",
-      },
-      {
-        title: "Savings Goal",
-        href: "/finance/savings-goal",
-        description:
-          "Set and monitor your personal or business savings targets.",
-      },
-      {
-        title: "Reports",
-        href: "/finance/reports",
-        description: "Analyze spending trends with detailed visual reports.",
+        title: "Account Types",
+        href: "/finance/account-types",
+        description: "Manage different types of accounts in the system.",
       },
       {
         title: "Category",
@@ -47,6 +35,28 @@ export const navConfig: NavItem[] = [
         href: "/finance/currency",
         description:
           "Manage and track different currency conversions and rates.",
+      },
+      {
+        title: "Reports",
+        href: "/finance/reports",
+        description: "Analyze spending trends with detailed visual reports.",
+      },
+      {
+        title: "Savings Goal",
+        href: "/finance/savings-goal",
+        description:
+          "Set and monitor your personal or business savings targets.",
+      },
+      {
+        title: "Transaction Explorer",
+        href: "/finance/transaction-explorer",
+        description:
+          "Search, filter, and view detailed transactions by date, type, and category.",
+      },
+      {
+        title: "Transactions",
+        href: "/finance/transaction",
+        description: "View and track your daily financial transactions.",
       },
     ],
   },
@@ -71,6 +81,11 @@ export const navConfig: NavItem[] = [
     description: "Personal account and preferences.",
     subItems: [
       {
+        title: "Logout",
+        href: "/auth/logout",
+        description: "Sign out of your MindVault account.",
+      },
+      {
         title: "Profile",
         href: "/user/profile",
         description: "View and edit your profile information.",
@@ -85,11 +100,6 @@ export const navConfig: NavItem[] = [
         href: "/user/system-role-configs",
         description:
           "See what each system role can do — permissions and access levels across the app.",
-      },
-      {
-        title: "Logout",
-        href: "/auth/logout",
-        description: "Sign out of your MindVault account.",
       },
     ],
   },

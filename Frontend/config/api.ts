@@ -33,6 +33,25 @@ export const ENDPOINTS = {
     remove: (id: number | string) => `/finance/categories/${id}`, // DELETE category
     stats: "/finance/categories/stats/all", // GET category stats
   },
+  accounts: {
+    create: "/finance/accounts", // POST create new account
+    my: "/finance/accounts/my", // GET accounts for current user
+    access: "/finance/accounts/access", // GET accounts with roles for current user
+    update: (id: number | string) => `/finance/accounts/${id}`, // PUT update account
+    remove: (id: number | string) => `/finance/accounts/${id}`, // DELETE account
+    getOne: (id: number | string) => `/finance/accounts/${id}`, // GET single account
+    types: {
+      all: "/finance/accounts/types/all", // GET all active account types
+    },
+    roles: {
+      assign: (id: number | string) => `/finance/accounts/${id}/roles`, // POST assign role to user
+      list: (id: number | string) => `/finance/accounts/${id}/roles`, // GET roles assigned to account
+      update: (id: number | string, userId: number | string) =>
+        `/finance/accounts/${id}/roles/${userId}`, // PUT update user role for account
+      remove: (id: number | string, userId: number | string) =>
+        `/finance/accounts/${id}/roles/${userId}`, // DELETE remove user role from account
+    },
+  },
   user: {
     profile: "/profile",
     updateProfile: "/profile",
