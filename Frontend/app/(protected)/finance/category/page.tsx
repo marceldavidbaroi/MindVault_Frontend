@@ -34,7 +34,6 @@ const CategoryPage = async () => {
       cache: "no-store",
     }
   );
-  console.log(categories);
   return (
     // Applied max-w-[900px] and mx-auto to center and constrain the content
     <div className="max-w-[1024px] mx-auto w-full">

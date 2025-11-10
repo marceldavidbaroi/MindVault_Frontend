@@ -1,5 +1,3 @@
-// components/navigation/navConfig.ts
-
 export interface NavItem {
   title: string;
   href?: string;
@@ -43,6 +41,12 @@ export const navConfig: NavItem[] = [
         title: "Category",
         href: "/finance/category",
         description: "All your transaction categories in one place.",
+      },
+      {
+        title: "Currency",
+        href: "/finance/currency",
+        description:
+          "Manage and track different currency conversions and rates.",
       },
     ],
   },

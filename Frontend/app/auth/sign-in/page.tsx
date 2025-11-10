@@ -23,7 +23,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState("David@123");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await authStore.signin(username, password);
@@ -40,8 +40,9 @@ export default function SignInPage() {
         <CardDescription>Login to continue</CardDescription>
       </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* ✅ Entire content inside one form */}
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
           {/* Username */}
           <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
@@ -55,7 +56,7 @@ export default function SignInPage() {
             />
           </div>
 
-          {/* Password with show/hide */}
+          {/* Password */}
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <div className="flex items-center space-x-0">
@@ -77,7 +78,7 @@ export default function SignInPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </Button>
             </div>
-            {/* Forgot Password Link */}
+
             <button
               type="button"
               className="text-sm text-right text-primary underline mt-1 self-end"
@@ -86,23 +87,26 @@ export default function SignInPage() {
               Forgot Password?
             </button>
           </div>
-        </form>
-      </CardContent>
+        </CardContent>
 
-      <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full" onClick={handleSubmit}>
-          Login
-        </Button>
-        <p className="text-sm text-center text-muted-foreground mt-4">
-          Don't have an account?{" "}
-          <button
-            onClick={() => router.push("/auth/sign-up")}
-            className="text-primary underline"
-          >
-            Sign Up
-          </button>
-        </p>
-      </CardFooter>
+        {/* ✅ The submit button must be INSIDE the form */}
+        <CardFooter className="flex-col gap-2">
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+
+          <p className="text-sm text-center text-muted-foreground mt-4">
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() => router.push("/auth/sign-up")}
+              className="text-primary underline"
+            >
+              Sign Up
+            </button>
+          </p>
+        </CardFooter>
+      </form>
     </Card>
   );
 }
