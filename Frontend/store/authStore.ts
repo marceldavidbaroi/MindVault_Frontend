@@ -6,6 +6,7 @@ interface AuthState {
   setUser: (user: any) => void;
   fetchUser: (req?: any) => Promise<void>;
   signin: (username: string, password: string) => Promise<any>;
+  signup: (username: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
 }
 
@@ -29,9 +30,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   signin: async (username: string, password: string) => {
     try {
       const { data } = await authService.signin(username, password);
-      console.log("store", data);
       //   const user = await authService.me();
       set(data);
+    } catch (error) {
+      console.error("Login failed:", error);
+      set({ user: null });
+      throw error;
+    }
+  },
+  signup: async (username: string, password: string) => {
+    try {
+      const { data } = await authService.signup(username, password);
+      //   const user = await authService.me();
     } catch (error) {
       console.error("Login failed:", error);
       set({ user: null });

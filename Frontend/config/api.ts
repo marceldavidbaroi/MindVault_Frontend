@@ -4,6 +4,7 @@ export const API_BASE_URL =
 export const ENDPOINTS = {
   auth: {
     signin: "/auth/signin",
+    signup: "/auth/signup",
     logout: "/auth/logout",
     me: "/auth/me",
     getPasskey: "/auth/passkey",

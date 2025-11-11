@@ -32,7 +32,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedAccountType, setSelectedAccountType] = useState<number>();
+  const [selectedAccountType, setSelectedAccountType] = useState<string>();
   const [selectedCurrency, setSelectedCurrency] = useState<string>();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -40,18 +40,18 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   const accountTypes: AccountType[] = accountStore.accountTypes || [];
   const currencies: Currency[] = currencyStore.currencies || [];
 
-  // Pre-fill form when in edit mode
+  // Pre-fill form when editing
   useEffect(() => {
     if (account) {
       setName(account.name);
       setDescription(account.description ?? "");
-      setSelectedAccountType(account.type?.id);
-      setSelectedCurrency(account.currencyCode?.code);
+      setSelectedAccountType(account.type?.id?.toString() ?? "");
+      setSelectedCurrency(account.currencyCode?.code ?? "");
     } else {
       setName("");
       setDescription("");
-      setSelectedAccountType(undefined);
-      setSelectedCurrency(undefined);
+      setSelectedAccountType("");
+      setSelectedCurrency("");
     }
     setErrors({});
   }, [account, open]);
@@ -64,23 +64,29 @@ export const AccountForm: React.FC<AccountFormProps> = ({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const data = {
-      name,
-      description,
-      initialBalance: 0,
-      accountTypeId: selectedAccountType!,
-      currencyCode: selectedCurrency!,
-    };
-
     if (account) {
-      await accountStore.updateAccount(account.id, data);
+      // Update mode — exclude initialBalance
+      const updateData = {
+        name,
+        description,
+        accountTypeId: Number(selectedAccountType),
+        currencyCode: selectedCurrency!,
+      };
+      await accountStore.updateAccount(account.id, updateData);
     } else {
-      await accountStore.createAccount(data);
+      // Create mode — include initialBalance
+      const createData = {
+        name,
+        description,
+        initialBalance: 0,
+        accountTypeId: Number(selectedAccountType),
+        currencyCode: selectedCurrency!,
+      };
+      await accountStore.createAccount(createData);
       await accountStore.getAccountsWithAccess();
     }
 
@@ -136,8 +142,8 @@ export const AccountForm: React.FC<AccountFormProps> = ({
             <div>
               <Label>Account Type</Label>
               <Select
-                value={selectedAccountType?.toString()}
-                onValueChange={(val) => setSelectedAccountType(Number(val))}
+                value={selectedAccountType || ""}
+                onValueChange={(val) => setSelectedAccountType(val)}
               >
                 <SelectTrigger
                   className={errors.accountType ? "border-red-500" : ""}
@@ -163,7 +169,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
             <div>
               <Label>Currency</Label>
               <Select
-                value={selectedCurrency}
+                value={selectedCurrency || ""}
                 onValueChange={(val) => setSelectedCurrency(val)}
               >
                 <SelectTrigger
