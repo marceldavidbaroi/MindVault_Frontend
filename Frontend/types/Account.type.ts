@@ -87,7 +87,7 @@ export interface UpdateRoleDto {
 }
 
 export interface AssignRoleDto {
-  userId: number;
+  username: string;
   roleId: number;
 }
 

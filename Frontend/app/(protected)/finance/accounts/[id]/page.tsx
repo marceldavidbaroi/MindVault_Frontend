@@ -1,11 +1,23 @@
 "use client";
 import AccountDetails from "@/components/accounts/AccountDetails";
-import { useParams } from "next/navigation";
-import React from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 
 const AccountDetailsPage = () => {
   const params = useParams();
-  const { id } = params;
+  const router = useRouter();
+
+  const id = params?.id ? Number(params.id) : undefined;
+
+  // Redirect or show an error if id is invalid
+  useEffect(() => {
+    if (!id) {
+      router.replace("/finance/accounts"); // redirect to account list
+    }
+  }, [id, router]);
+
+  if (!id) return null; // or a loader
+
   return <AccountDetails id={id} />;
 };
 

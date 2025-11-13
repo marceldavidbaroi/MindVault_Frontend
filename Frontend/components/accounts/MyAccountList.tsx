@@ -1,19 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useRouter } from "next/navigation";
 import { useAccountStore } from "@/store/accountStore";
-import { AccountForm } from "./CreateAccountDialog";
 import type { Account } from "@/types/Account.type";
 
 export const MyAccountList: React.FC = () => {
   const accounts = useAccountStore((state) => state.accounts);
-  const [edit, setEdit] = useState(false);
-  const [targetEdit, setTargetEdit] = useState<Account | null>(null);
+  const router = useRouter();
 
   const handleClick = (account: Account) => {
-    console.log(account);
-    setEdit(true);
-    setTargetEdit(account);
+    router.push(`/finance/accounts/${account.id}`);
   };
 
   if (!accounts?.length) {
@@ -36,7 +33,7 @@ export const MyAccountList: React.FC = () => {
         >
           <div>
             <h3 className="text-lg font-semibold text-foreground">
-              {account.name}
+              #{account.id} {account.name}
             </h3>
             <p className="text-sm text-muted-foreground">
               Type: {account.type?.name ?? "N/A"}
@@ -58,13 +55,6 @@ export const MyAccountList: React.FC = () => {
           </div>
         </div>
       ))}
-
-      {/* Account Form */}
-      <AccountForm
-        open={edit}
-        onClose={() => setEdit(false)}
-        account={targetEdit || undefined}
-      />
     </div>
   );
 };
