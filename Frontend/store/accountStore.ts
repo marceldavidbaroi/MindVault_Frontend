@@ -9,6 +9,7 @@ import {
   AssignRoleDto,
   AccountRole,
   AccessAccount,
+  UpdateRoleDto,
 } from "@/types/Account.type";
 
 interface AccountState {
@@ -36,7 +37,7 @@ interface AccountState {
   updateAccountRole: (
     accountId: number,
     userId: number,
-    data: AssignRoleDto
+    data: UpdateRoleDto
   ) => Promise<any>;
   removeAccountRole: (accountId: number, userId: number) => Promise<any>;
 }

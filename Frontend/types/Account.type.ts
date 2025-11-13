@@ -82,9 +82,13 @@ export interface AccountRole {
 }
 
 /** DTO for assigning/updating a user role for an account */
+export interface UpdateRoleDto {
+  roleId: number; // role name or role ID depending on backend implementation
+}
+
 export interface AssignRoleDto {
   userId: number;
-  role: string; // role name or role ID depending on backend implementation
+  roleId: number;
 }
 
 /** Filters for fetching accounts */

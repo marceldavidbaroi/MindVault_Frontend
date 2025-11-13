@@ -6,6 +6,7 @@ import {
   CreateAccountDto,
   UpdateAccountDto,
   AssignRoleDto,
+  UpdateRoleDto,
   AccessAccount,
 } from "@/types/Account.type";
 
@@ -79,7 +80,7 @@ export const accountService = {
     }),
 
   /** Update a user role for an account */
-  updateRole: (accountId: number, userId: number, data: AssignRoleDto) =>
+  updateRole: (accountId: number, userId: number, data: UpdateRoleDto) =>
     fetcher<ApiResponse<null>>(
       ENDPOINTS.accounts.roles.update(accountId, userId),
       {
