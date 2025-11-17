@@ -14,11 +14,13 @@ import {
 
 interface AccountState {
   accounts: Account[];
+  selectedAccountId: string | number | null;
   accessAccounts: AccessAccount[];
   accountTypes: AccountType[];
   accountRoles: Record<number, AccountRole[]>; // key = accountId
 
   setAccounts: (accounts: Account[]) => void;
+  setSelectedAccountId: (selectedAccountId: number | string | null) => void;
   setAccessAccounts: (accounts: AccessAccount[]) => void;
   setAccountTypes: (types: AccountType[]) => void;
   setAccountRoles: (accountId: number, roles: AccountRole[]) => void;
@@ -44,11 +46,13 @@ interface AccountState {
 
 export const useAccountStore = create<AccountState>((set, get) => ({
   accounts: [],
+  selectedAccountId: null,
   accessAccounts: [],
   accountTypes: [],
   accountRoles: {},
 
   setAccounts: (accounts) => set({ accounts }),
+  setSelectedAccountId: (selectedAccountId) => set({ selectedAccountId }),
   setAccessAccounts: (accessAccounts) => set({ accessAccounts }),
   setAccountTypes: (accountTypes) => set({ accountTypes }),
   setAccountRoles: (accountId, roles) =>

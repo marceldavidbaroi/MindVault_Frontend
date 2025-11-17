@@ -1,126 +1,180 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import FinancialSummaryCard from "@/components/transaction/FinancialSummaryCard";
-import TransactionTableMini from "@/components/transaction/TransactionTableMini";
-import WeeklySpendingCard from "@/components/transaction/WeeklySpendingCard";
-import FinancialSummaryCardSkeleton from "./skeleton/FinancialSummaryCardSkeleton";
-import WeeklySpendingCardSkeleton from "./skeleton/WeeklySpendingCardSkeleton";
-import TransactionTableMiniSkeleton from "./skeleton/TransactionTableMiniSkeleton";
-import { useSummaryStore } from "@/store/summaryStore";
-import TransactionList from "./TransactionList";
+import AccountsList from "./AccountList";
+import { AccessAccount } from "@/types/Account.type";
+import { useAccountStore } from "@/store/accountStore";
+import { Button } from "@/components/ui/button";
+import { Plus, Layers, Compass } from "lucide-react";
 import { useCategoryStore } from "@/store/categoryStore";
-import { TransactionSummaryDashboard } from "@/types/Summary.type";
-import { Category } from "@/types/Category.type";
+import { useCurrencyStore } from "@/store/currencyStore";
+import {
+  TransactionDialog,
+  TransactionDialogData,
+} from "./TransactionFormModal";
+
 interface TransactionIndexProps {
-  data: TransactionSummaryDashboard;
-  categoriesData: Category[];
+  selectedAccountId: string | number | null;
 }
+
 const TransactionIndex: React.FC<TransactionIndexProps> = ({
-  data,
-  categoriesData,
+  selectedAccountId,
 }) => {
-  const { transactionsDashboard, setTransactionDashboard } = useSummaryStore();
-  const { categories, setCategories } = useCategoryStore();
-  const [showList, setShowList] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const accountStore = useAccountStore();
+  const categoryStore = useCategoryStore();
+  const currencyStore = useCurrencyStore();
+
+  const getInitialData = async () => {
+    await Promise.all([
+      accountStore.getAccountsWithAccess(),
+      categoryStore.getAllCategories(),
+      currencyStore.getAllCurrencies(),
+    ]);
+  };
 
   useEffect(() => {
-    if (data) setLoading(false);
-  }, [data]);
+    getInitialData();
+  }, []);
 
   useEffect(() => {
-    setTransactionDashboard(data);
-    console.log("data", data);
-  }, [data, setTransactionDashboard]);
+    accountStore.setSelectedAccountId(selectedAccountId);
+  }, [selectedAccountId]);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => {
-    setCategories(categoriesData);
-    console.log("category data", categoriesData);
-  }, [categoriesData, setCategories]);
+  // For edit mode (null = create mode)
+  const [editData, setEditData] = useState<TransactionDialogData | undefined>(
+    undefined
+  );
 
-  useEffect(() => {
-    console.log("Updated store:", transactionsDashboard);
-  }, [transactionsDashboard]);
-  useEffect(() => {
-    console.log("Updated store:for categories", categoriesData);
-  }, [categoriesData]);
+  // open create dialog
+  const handleAddTransaction = () => {
+    setEditData(undefined);
+    setDialogOpen(true);
+  };
+
+  // open edit dialog
+  const openEditDialog = () => {
+    setEditData({
+      accountId: 3,
+      categoryId: 2,
+      type: "expense",
+      amount: "120.50",
+      currencyCode: "USD",
+      transactionDate: "2025-11-17",
+      description: "Lunch with team",
+      status: "pending",
+      recurring: false,
+    });
+    setDialogOpen(true);
+  };
+
+  // handle save
+  const handleSubmit = async (data: TransactionDialogData) => {
+    console.log("Submitted: ", data);
+
+    // TODO: call your API here
+
+    // close dialog
+    setDialogOpen(false);
+  };
+
+  const handleBulkTransaction = () => console.log("Bulk Transaction clicked");
+  const handleExplorer = () => console.log("Explorer clicked");
 
   return (
-    <div className="min-h-[70vh] p-4 bg-background text-foreground transition-colors duration-300">
-      {/* Summary + Table Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {/* LEFT SIDE */}
-        <div className="col-span-1 md:col-span-3 flex flex-col gap-4">
-          {/* Top row: Summary Cards */}
+    <div className="h-[80vh] grid grid-cols-12 gap-3 p-3">
+      {/* LEFT SIDEBAR - GLASS */}
+      <div
+        className="
+          col-span-2 h-full
+          rounded-xl
+          backdrop-blur-md
+          bg-white/10 dark:bg-black/20
+          flex flex-col
+          overflow-y-auto
+          scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-transparent
+        "
+      >
+        <AccountsList />
+      </div>
+
+      {/* RIGHT SIDE */}
+      <div className="col-span-10 grid grid-rows-[5%_25%_70%] gap-3">
+        {/* BUTTONS ROW - RIGHT ALIGNED */}
+        <div className="flex justify-end gap-1">
+          <Button
+            className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
+            onClick={handleAddTransaction}
+          >
+            <Plus size={16} />
+          </Button>
+
+          <Button
+            className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
+            onClick={handleBulkTransaction}
+          >
+            <Layers size={16} />
+          </Button>
+
+          <Button
+            className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
+            onClick={handleExplorer}
+          >
+            <Compass size={16} />
+          </Button>
+        </div>
+
+        {/* TOP SECTION - GLASS */}
+        <div
+          className="
+            rounded-xl
+            backdrop-blur-md
+            bg-white/10 dark:bg-black/20
+            border border-white/20 dark:border-white/10
+            shadow-md
+            p-4
+          "
+        >
+          <h2 className="text-lg font-semibold">Top Section</h2>
+        </div>
+
+        {/* BOTTOM SECTION (split 5 + 5) */}
+        <div className="grid grid-cols-10 gap-3">
           <div
             className="
-              flex overflow-x-auto px-2 py-2 gap-4 snap-x snap-mandatory
-              scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent
-              scrollbar-thumb-rounded-full
-              hover:scrollbar-thumb-muted/80
-              transition-colors duration-200
-              [&::-webkit-scrollbar]:h-2
-              [&::-webkit-scrollbar-track]:bg-muted/20
-              [&::-webkit-scrollbar-thumb]:bg-muted
-              [&::-webkit-scrollbar-thumb]:rounded-full
-              [&::-webkit-scrollbar-thumb:hover]:bg-muted/80
+              col-span-5
+              rounded-xl
+              backdrop-blur-md
+              bg-white/10 dark:bg-black/20
+              border border-white/20 dark:border-white/10
+              shadow-md
+              p-4
             "
           >
-            {transactionsDashboard.summary.length === 0
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 snap-start min-w-[250px]"
-                  >
-                    <FinancialSummaryCardSkeleton />
-                  </div>
-                ))
-              : transactionsDashboard.summary.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 snap-start min-w-[250px]"
-                  >
-                    <FinancialSummaryCard data={item} />
-                  </div>
-                ))}
+            <h2 className="text-lg font-semibold">Bottom Left</h2>
           </div>
 
-          {/* Bottom: Transaction Table */}
-          <div className="flex-1 overflow-auto  rounded-xl shadow-sm ">
-            {loading ? (
-              <TransactionTableMiniSkeleton />
-            ) : (
-              <TransactionTableMini
-                data={transactionsDashboard.recentTransactions}
-                onInfoClick={() => setShowList(!showList)}
-              />
-            )}
+          <div
+            className="
+              col-span-5
+              rounded-xl
+              backdrop-blur-md
+              bg-white/10 dark:bg-black/20
+              border border-white/20 dark:border-white/10
+              shadow-md
+              p-4
+            "
+          >
+            <h2 className="text-lg font-semibold">Bottom Right</h2>
           </div>
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
-          {loading ? (
-            <WeeklySpendingCardSkeleton />
-          ) : (
-            <WeeklySpendingCard
-              totalRemainingIncomeAllTime={
-                transactionsDashboard.totalRemainingIncomeAllTime
-              }
-              totalRemainingIncomeThisMonth={
-                transactionsDashboard.totalRemainingIncomeThisMonth
-              }
-              weekly={transactionsDashboard.weekly}
-            />
-          )}
         </div>
       </div>
-      {showList && (
-        <div className="mt-6">
-          <TransactionList />
-        </div>
-      )}
+
+      <TransactionDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        initialData={editData}
+      />
     </div>
   );
 };

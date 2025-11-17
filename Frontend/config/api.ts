@@ -16,7 +16,9 @@ export const ENDPOINTS = {
       `/auth/forgot-password/${username}/verify`,
   },
   summary: {
-    transactionDashboard: "/summary/transaction-dashboard",
+    // transactionDashboard: "/summary/transaction-dashboard",
+    dashboard_comparison: (accountId: number | string) =>
+      `/summaries/${accountId}/comparison`,
   },
   transaction: {
     all: "/transactions", // GET all transactions with filters & pagination
