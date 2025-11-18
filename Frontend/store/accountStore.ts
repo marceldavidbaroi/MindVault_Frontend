@@ -15,12 +15,14 @@ import {
 interface AccountState {
   accounts: Account[];
   selectedAccountId: string | number | null;
+  selectedAccount: any | null;
   accessAccounts: AccessAccount[];
   accountTypes: AccountType[];
   accountRoles: Record<number, AccountRole[]>; // key = accountId
 
   setAccounts: (accounts: Account[]) => void;
   setSelectedAccountId: (selectedAccountId: number | string | null) => void;
+  setSelectedAccount: (selectedAccount: Account | null) => void;
   setAccessAccounts: (accounts: AccessAccount[]) => void;
   setAccountTypes: (types: AccountType[]) => void;
   setAccountRoles: (accountId: number, roles: AccountRole[]) => void;
@@ -46,12 +48,14 @@ interface AccountState {
 
 export const useAccountStore = create<AccountState>((set, get) => ({
   accounts: [],
+  selectedAccount: null,
   selectedAccountId: null,
   accessAccounts: [],
   accountTypes: [],
   accountRoles: {},
 
   setAccounts: (accounts) => set({ accounts }),
+  setSelectedAccount: (selectedAccount) => set({ selectedAccount }),
   setSelectedAccountId: (selectedAccountId) => set({ selectedAccountId }),
   setAccessAccounts: (accessAccounts) => set({ accessAccounts }),
   setAccountTypes: (accountTypes) => set({ accountTypes }),
@@ -73,6 +77,7 @@ export const useAccountStore = create<AccountState>((set, get) => ({
 
   getAccount: async (id) => {
     const res = await accountService.getOne(id);
+    if (res.success) set({ selectedAccount: res.data });
     return res;
   },
 

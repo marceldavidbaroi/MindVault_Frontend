@@ -27,13 +27,17 @@ export interface Transaction {
 /** DTOs for API requests */
 
 export interface CreateTransactionDto {
-  type: TransactionType;
-  categoryId: number;
-  amount: number;
-  date: string; // ISO string YYYY-MM-DD
+  accountId: number | string | null;
+  categoryId?: number;
+  type: "income" | "expense";
+  amount: string;
+  currencyCode?: string;
+  transactionDate: string; // YYYY-MM-DD
   description?: string;
+  status?: "pending" | "cleared" | "void" | "failed";
+  externalRefId?: string;
   recurring?: boolean;
-  recurringInterval?: RecurringInterval;
+  recurringInterval?: "daily" | "weekly" | "monthly" | "yearly";
 }
 
 export interface TransactionItemDto {

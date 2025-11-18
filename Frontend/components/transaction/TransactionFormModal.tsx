@@ -23,27 +23,28 @@ import { useAccountStore } from "@/store/accountStore";
 import { useCategoryStore } from "@/store/categoryStore";
 import { useCurrencyStore } from "@/store/currencyStore";
 import { format } from "date-fns";
-import { DatePicker } from "../ui/date-picker";
-
-export type TransactionDialogData = {
-  accountId?: number | null;
-  categoryId?: number;
-  type?: "income" | "expense";
-  amount?: string;
-  currencyCode?: string;
-  transactionDate?: string;
-  description?: string;
-  status?: "pending" | "cleared" | "void" | "failed";
-  externalRefId?: string;
-  recurring?: boolean;
-  recurringInterval?: "daily" | "weekly" | "monthly" | "yearly";
-};
+import { Calendar28 } from "../ui/date-picker";
+import { useTransactionStore } from "@/store/transactionStore";
+import { CreateTransactionDto } from "@/types/Transaction.type";
 
 interface TransactionDialogProps {
   open: boolean;
   onClose: () => void;
-  initialData?: TransactionDialogData;
+  initialData?: CreateTransactionDto;
 }
+
+const getDefaultForm = (
+  accountCurrency?: string,
+  initialData?: CreateTransactionDto
+) => ({
+  type: "income" as "income" | "expense",
+  status: "pending" as "pending" | "cleared" | "void" | "failed",
+  recurring: false,
+  recurringInterval: "daily" as "daily" | "weekly" | "monthly" | "yearly",
+  transactionDate: format(new Date(), "yyyy-MM-dd"),
+  currencyCode: accountCurrency,
+  ...initialData,
+});
 
 export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   open,
@@ -53,44 +54,92 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   const accountStore = useAccountStore();
   const categoryStore = useCategoryStore();
   const currencyStore = useCurrencyStore();
+  const transactionStore = useTransactionStore();
 
-  const [form, setForm] = useState<TransactionDialogData>({
-    type: "income",
-    status: "pending",
-    recurring: false,
-    recurringInterval: "daily",
-    transactionDate: format(new Date(), "yyyy-MM-dd"),
-    ...initialData,
-  });
+  const [form, setForm] = useState<Partial<CreateTransactionDto>>(
+    getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
+  );
+  const [loading, setLoading] = useState(false);
+
+  // Validation state
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof CreateTransactionDto, string>>
+  >({});
+
+  // Reset form and errors when dialog closes or initialData changes
+  useEffect(() => {
+    if (!open) {
+      setForm(
+        getDefaultForm(
+          accountStore.selectedAccount?.currency?.code,
+          initialData
+        )
+      );
+      setErrors({});
+    }
+  }, [open, initialData, accountStore.selectedAccount?.currency?.code]);
+
+  const handleChange = (key: keyof CreateTransactionDto, value: any) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+    // Clear error for field when changed
+    setErrors((prev) => ({ ...prev, [key]: undefined }));
+  };
 
   const filteredCategories = categoryStore.categories.filter(
     (c) => c.type === form.type
   );
 
-  const handleChange = (key: keyof TransactionDialogData, value: any) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof CreateTransactionDto, string>> = {};
+
+    if (!accountStore.selectedAccountId)
+      newErrors.accountId = "Account is required.";
+    if (!form.type) newErrors.type = "Transaction type is required.";
+    if (!form.categoryId) newErrors.categoryId = "Category is required.";
+    if (!form.amount || form.amount.trim() === "")
+      newErrors.amount = "Amount is required.";
+    if (!form.transactionDate)
+      newErrors.transactionDate = "Transaction date is required.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
-  useEffect(() => {
-    const account = accountStore.accessAccounts.find(
-      (acc) => acc.id === accountStore.selectedAccountId
-    );
-    console.log(account);
-  }, [accountStore.selectedAccountId]);
-  const [loading, setLoading] = useState(false);
-
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+
     try {
       setLoading(true);
 
-      console.log("Submitting transaction payload: ", form);
+      const payload: CreateTransactionDto = {
+        accountId: Number(accountStore.selectedAccountId),
+        type: form.type!,
+        amount: form.amount!,
+        transactionDate: form.transactionDate!,
+        categoryId: form.categoryId,
+        currencyCode: form.currencyCode,
+        description: form.description,
+        status: form.status,
+        externalRefId: form.externalRefId,
+        recurring: form.recurring,
+        recurringInterval: form.recurringInterval,
+      };
 
+      await transactionStore.createTransaction(payload);
+
+      setForm(getDefaultForm(accountStore.selectedAccount?.currency?.code));
+      setErrors({});
       onClose();
-    } catch (err: any) {
-      console.error("Transaction save error:", err?.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderError = (field: keyof CreateTransactionDto) => {
+    if (!errors[field]) return null;
+    return <p className="text-sm text-red-600 mt-1">{errors[field]}</p>;
   };
 
   return (
@@ -125,6 +174,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            {renderError("accountId")}
           </div>
 
           {/* Type */}
@@ -144,6 +194,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                 <Label htmlFor="type-expense">Expense</Label>
               </div>
             </RadioGroup>
+            {renderError("type")}
           </div>
 
           {/* Category */}
@@ -164,6 +215,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            {renderError("categoryId")}
           </div>
 
           {/* Currency */}
@@ -212,25 +264,17 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               onChange={(e) => handleChange("amount", e.target.value)}
               placeholder="0.00"
             />
+            {renderError("amount")}
           </div>
 
           {/* Date */}
           <div>
             <Label>Date</Label>
-            <DatePicker
-              selected={
-                form.transactionDate
-                  ? new Date(form.transactionDate)
-                  : undefined
-              }
-              onSelect={(date) =>
-                handleChange(
-                  "transactionDate",
-                  date.toISOString().split("T")[0]
-                )
-              }
-              placeholder="Pick a date"
+            <Calendar28
+              value={form.transactionDate}
+              onChange={(date) => handleChange("transactionDate", date)}
             />
+            {renderError("transactionDate")}
           </div>
 
           {/* Description */}
@@ -289,7 +333,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? "Saving..." : "Save"}
-          </Button>{" "}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

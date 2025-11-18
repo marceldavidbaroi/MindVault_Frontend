@@ -8,10 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Plus, Layers, Compass } from "lucide-react";
 import { useCategoryStore } from "@/store/categoryStore";
 import { useCurrencyStore } from "@/store/currencyStore";
-import {
-  TransactionDialog,
-  TransactionDialogData,
-} from "./TransactionFormModal";
+import { TransactionDialog } from "./TransactionFormModal";
+import { CreateTransactionDto } from "@/types/Transaction.type";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -37,12 +35,16 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   }, []);
 
   useEffect(() => {
+    const getAccount = async () => {
+      await accountStore.getAccount(Number(selectedAccountId));
+    };
     accountStore.setSelectedAccountId(selectedAccountId);
+    getAccount();
   }, [selectedAccountId]);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // For edit mode (null = create mode)
-  const [editData, setEditData] = useState<TransactionDialogData | undefined>(
+  const [editData, setEditData] = useState<CreateTransactionDto | undefined>(
     undefined
   );
 
