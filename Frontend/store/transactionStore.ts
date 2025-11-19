@@ -1,4 +1,3 @@
-// store/transactionStore.ts
 import { create } from "zustand";
 import { transactionService } from "@/services/transactionService";
 import {
@@ -8,20 +7,24 @@ import {
   BulkTransactionDto,
   FindTransactionsDto,
   ApiResponse,
+  PaginatedTransactions,
 } from "@/types/Transaction.type";
 
 interface TransactionState {
-  transactions: Transaction[];
+  transactions: PaginatedTransactions | null;
   meta: TransactionMeta | null;
 
   /** State updaters */
   setTransactions: (
-    transactions: Transaction[],
+    transactions: PaginatedTransactions,
     meta?: TransactionMeta
   ) => void;
 
   /** Fetch all transactions */
-  getAllTransactions: (params?: FindTransactionsDto) => Promise<void>;
+  getAllTransactions: (
+    accountId: number,
+    params?: FindTransactionsDto
+  ) => Promise<void>;
 
   /** Fetch a single transaction by ID */
   getTransaction: (id: number) => Promise<Transaction | null>;
@@ -47,23 +50,19 @@ interface TransactionState {
 }
 
 export const useTransactionStore = create<TransactionState>((set, get) => ({
-  transactions: [],
+  transactions: null,
   meta: null,
 
   setTransactions: (transactions, meta) =>
     set({ transactions, meta: meta || null }),
 
-  getAllTransactions: async (params) => {
+  getAllTransactions: async (accountId, params) => {
     try {
-      const res: ApiResponse<Transaction[]> = await transactionService.getAll(
-        params
-      );
-      console.log("response", res);
+      const res: ApiResponse<PaginatedTransactions> =
+        await transactionService.getAll(accountId, params);
 
       if (res.success) {
-        const meta = res.meta ?? (res as any)?.data?.meta ?? null;
-        set({ transactions: res.data, meta });
-        console.log(meta);
+        set({ transactions: res.data, meta: res.meta ?? null });
       }
     } catch (error) {
       console.error("Failed to fetch transactions:", error);
@@ -85,11 +84,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const res: ApiResponse<Transaction> = await transactionService.create(
         data
       );
-      if (res.success) {
-        set({ transactions: [res.data, ...get().transactions] });
-        return res.data;
-      }
-      return null;
+      return res.success ? res.data : null;
     } catch (error) {
       console.error("Failed to create transaction:", error);
       return null;
@@ -102,15 +97,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         id,
         data
       );
-      if (res.success) {
-        set({
-          transactions: get().transactions.map((t) =>
-            t.id === id ? res.data : t
-          ),
-        });
-        return res.data;
-      }
-      return null;
+      return res.success ? res.data : null;
     } catch (error) {
       console.error("Failed to update transaction:", error);
       return null;
@@ -120,11 +107,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   deleteTransaction: async (id) => {
     try {
       const res: ApiResponse<null> = await transactionService.remove(id);
-      if (res.success) {
-        set({ transactions: get().transactions.filter((t) => t.id !== id) });
-        return true;
-      }
-      return false;
+      return res.success;
     } catch (error) {
       console.error("Failed to delete transaction:", error);
       return false;
@@ -135,11 +118,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     try {
       const res: ApiResponse<Transaction[]> =
         await transactionService.createBulk(data);
-      if (res.success) {
-        set({ transactions: [...res.data, ...get().transactions] });
-        return res.data;
-      }
-      return null;
+      return res.success ? res.data : null;
     } catch (error) {
       console.error("Failed to bulk create transactions:", error);
       return null;

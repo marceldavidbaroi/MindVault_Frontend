@@ -144,13 +144,16 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent
+        className="sm:max-w-lg max-h-[70vh] overflow-y-auto
+             scrollbar-thin scrollbar-track-transparent scrollbar-thumb-rounded-md
+             scrollbar-thumb-neutral-400 hover:scrollbar-thumb-neutral-500"
+      >
         <DialogHeader>
           <DialogTitle>
             {initialData ? "Edit Transaction" : "Create Transaction"}
           </DialogTitle>
         </DialogHeader>
-
         <div className="grid gap-4 py-4">
           {/* Account */}
           <div>
@@ -326,7 +329,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             </div>
           )}
         </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel

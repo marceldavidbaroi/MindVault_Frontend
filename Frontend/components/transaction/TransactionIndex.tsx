@@ -9,7 +9,17 @@ import { Plus, Layers, Compass } from "lucide-react";
 import { useCategoryStore } from "@/store/categoryStore";
 import { useCurrencyStore } from "@/store/currencyStore";
 import { TransactionDialog } from "./TransactionFormModal";
-import { CreateTransactionDto } from "@/types/Transaction.type";
+import {
+  CreateTransactionDto,
+  FindTransactionsDto,
+} from "@/types/Transaction.type";
+import DashboardSummaryRow from "./DashboardSummaryRow";
+import { useSummaryStore } from "@/store/summaryStore";
+import { useTransactionStore } from "@/store/transactionStore";
+import { useUserStore } from "@/store/userStore";
+import { format } from "date-fns";
+import CompactTransactionList from "./CompactTransactionList";
+import CategorySummaryChart from "./Category Summary Bar Chart";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -21,26 +31,56 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const accountStore = useAccountStore();
   const categoryStore = useCategoryStore();
   const currencyStore = useCurrencyStore();
-
-  const getInitialData = async () => {
-    await Promise.all([
-      accountStore.getAccountsWithAccess(),
-      categoryStore.getAllCategories(),
-      currencyStore.getAllCurrencies(),
-    ]);
-  };
+  const summaryStore = useSummaryStore();
+  const transactionStore = useTransactionStore();
+  const userStore = useUserStore();
 
   useEffect(() => {
-    getInitialData();
-  }, []);
+    const loadData = async () => {
+      // Only fetch static data once
+      await Promise.all([
+        accountStore.getAccountsWithAccess(),
+        categoryStore.getAllCategories(),
+        currencyStore.getAllCurrencies(),
+      ]);
+      const today = new Date();
 
-  useEffect(() => {
-    const getAccount = async () => {
-      await accountStore.getAccount(Number(selectedAccountId));
+      // Fetch the selected account & dashboard summary only if ID exists
+      if (selectedAccountId != null) {
+        await accountStore.getAccount(Number(selectedAccountId));
+        await summaryStore.getTransactionDashboardComparison(
+          Number(selectedAccountId)
+        );
+        await summaryStore.getDailyCategorySummary(Number(selectedAccountId), {
+          date: format(new Date(), "yyyy-MM-dd"),
+        });
+        await summaryStore.getMonthlyCategorySummary(
+          Number(selectedAccountId),
+          {
+            month: parseInt(format(today, "MM"), 10),
+            year: parseInt(format(today, "yyyy"), 10), // 2025
+          }
+        );
+        accountStore.setSelectedAccountId(selectedAccountId);
+        const query: FindTransactionsDto = {
+          creatorUserId: userStore.user?.id,
+          from: format(new Date(), "yyyy-MM-dd"),
+          to: format(new Date(), "yyyy-MM-dd"),
+          page: 1,
+          pageSize: 5,
+          sortBy: "updatedAt",
+          sortOrder: "DESC",
+        };
+        await transactionStore.getAllTransactions(
+          Number(selectedAccountId),
+          query
+        );
+      }
     };
-    accountStore.setSelectedAccountId(selectedAccountId);
-    getAccount();
+
+    loadData();
   }, [selectedAccountId]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // For edit mode (null = create mode)
@@ -52,32 +92,6 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const handleAddTransaction = () => {
     setEditData(undefined);
     setDialogOpen(true);
-  };
-
-  // open edit dialog
-  const openEditDialog = () => {
-    setEditData({
-      accountId: 3,
-      categoryId: 2,
-      type: "expense",
-      amount: "120.50",
-      currencyCode: "USD",
-      transactionDate: "2025-11-17",
-      description: "Lunch with team",
-      status: "pending",
-      recurring: false,
-    });
-    setDialogOpen(true);
-  };
-
-  // handle save
-  const handleSubmit = async (data: TransactionDialogData) => {
-    console.log("Submitted: ", data);
-
-    // TODO: call your API here
-
-    // close dialog
-    setDialogOpen(false);
   };
 
   const handleBulkTransaction = () => console.log("Bulk Transaction clicked");
@@ -129,15 +143,14 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
         {/* TOP SECTION - GLASS */}
         <div
           className="
-            rounded-xl
-            backdrop-blur-md
-            bg-white/10 dark:bg-black/20
-            border border-white/20 dark:border-white/10
-            shadow-md
-            p-4
-          "
+    rounded-xl
+    backdrop-blur-md
+    overflow-x-auto
+  "
         >
-          <h2 className="text-lg font-semibold">Top Section</h2>
+          <div className="flex gap-4 min-w-max">
+            <DashboardSummaryRow />
+          </div>
         </div>
 
         {/* BOTTOM SECTION (split 5 + 5) */}
@@ -147,13 +160,10 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
               col-span-5
               rounded-xl
               backdrop-blur-md
-              bg-white/10 dark:bg-black/20
-              border border-white/20 dark:border-white/10
-              shadow-md
-              p-4
+              
             "
           >
-            <h2 className="text-lg font-semibold">Bottom Left</h2>
+            <CompactTransactionList />
           </div>
 
           <div
@@ -167,7 +177,7 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
               p-4
             "
           >
-            <h2 className="text-lg font-semibold">Bottom Right</h2>
+            <CategorySummaryChart />
           </div>
         </div>
       </div>

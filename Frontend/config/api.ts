@@ -19,9 +19,14 @@ export const ENDPOINTS = {
     // transactionDashboard: "/summary/transaction-dashboard",
     dashboard_comparison: (accountId: number | string) =>
       `/summaries/${accountId}/comparison`,
+    dailyCategorySummary: (accountId: number) =>
+      `/summaries/${accountId}/daily`,
+    monthlyCategorySummary: (accountId: number) =>
+      `/summaries/${accountId}/monthly`,
   },
   transaction: {
-    all: "/transactions", // GET all transactions with filters & pagination
+    // all: "/transactions", // GET all transactions with filters & pagination
+    getAll: (accountId: number) => `/transactions/${accountId}/transactions`,
     getOne: (id: number | string) => `/transactions/${id}`, // GET single transaction
     create: "/transactions", // POST create transaction
     createBulk: "/transactions/bulk", // POST bulk create

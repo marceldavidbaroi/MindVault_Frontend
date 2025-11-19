@@ -5,6 +5,7 @@ import {
   BulkTransactionDto,
   FindTransactionsDto,
   Transaction,
+  PaginatedTransactions,
 } from "@/types/Transaction.type"; // <-- make a types file for these
 
 interface ApiResponse<T> {
@@ -20,12 +21,12 @@ interface ApiResponse<T> {
 
 export const transactionService = {
   /** GET all transactions with optional query params */
-  getAll: (query?: FindTransactionsDto) => {
+  getAll: (accountId: number, query?: FindTransactionsDto) => {
     const params = query
       ? "?" + new URLSearchParams(query as any).toString()
       : "";
-    return fetcher<ApiResponse<Transaction[]>>(
-      `${ENDPOINTS.transaction.all}${params}`,
+    return fetcher<ApiResponse<any>>(
+      `${ENDPOINTS.transaction.getAll(accountId)}${params}`,
       { method: "GET" }
     );
   },

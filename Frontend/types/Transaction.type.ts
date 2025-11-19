@@ -13,15 +13,39 @@ export interface TransactionCategory {
 
 export interface Transaction {
   id: number;
-  type: TransactionType;
-  category: TransactionCategory;
+  type: "income" | "expense";
   amount: string;
-  date: string;
-  description?: string;
+  transactionDate: string; // YYYY-MM-DD
+  description: string | null;
+  status: "pending" | "cleared" | "void" | "failed";
   recurring: boolean;
-  recurringInterval?: RecurringInterval | null;
-  createdAt: string;
-  updatedAt: string;
+  recurringInterval: "daily" | "weekly" | "monthly" | "yearly";
+  externalRefId: string | null;
+  createdAt: string; // ISO date
+  updatedAt: string; // ISO date
+  account: {
+    id: number;
+    name: string;
+  };
+  category: {
+    id: number;
+    name: string;
+  };
+  currency: {
+    symbol: string;
+    code: string;
+  };
+  creatorUser: {
+    id: number;
+    username: string;
+  };
+}
+
+export interface PaginatedTransactions {
+  items: Transaction[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 /** DTOs for API requests */
@@ -52,12 +76,24 @@ export interface BulkTransactionDto {
 }
 
 export interface FindTransactionsDto {
-  type?: TransactionType;
   categoryId?: number;
-  startDate?: string;
-  endDate?: string;
+  type?: TransactionType;
+  status?: "pending" | "cleared" | "void" | "failed";
+  creatorUserId?: number;
+  from?: string; // YYYY-MM-DD
+  to?: string; // YYYY-MM-DD
   page?: number;
-  limit?: number;
+  pageSize?: number;
+  sortBy?:
+    | "transactionDate"
+    | "amount"
+    | "type"
+    | "status"
+    | "externalRefId"
+    | "id"
+    | "createdAt"
+    | "updatedAt";
+  sortOrder?: "ASC" | "DESC";
 }
 
 export interface SummaryData {
