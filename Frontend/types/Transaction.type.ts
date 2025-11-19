@@ -51,6 +51,7 @@ export interface PaginatedTransactions {
 /** DTOs for API requests */
 
 export interface CreateTransactionDto {
+  id?: number;
   accountId: number | string | null;
   categoryId?: number;
   type: "income" | "expense";

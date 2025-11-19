@@ -54,7 +54,7 @@ export const transactionService = {
   /** UPDATE transaction by ID */
   update: (id: number, data: Partial<CreateTransactionDto>) =>
     fetcher<ApiResponse<Transaction>>(ENDPOINTS.transaction.update(id), {
-      method: "PATCH",
+      method: "PUT",
       body: JSON.stringify(data),
     }),
 

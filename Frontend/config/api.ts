@@ -30,7 +30,7 @@ export const ENDPOINTS = {
     getOne: (id: number | string) => `/transactions/${id}`, // GET single transaction
     create: "/transactions", // POST create transaction
     createBulk: "/transactions/bulk", // POST bulk create
-    update: (id: number | string) => `/transactions/${id}`, // PATCH update
+    update: (id: number | string) => `/transactions/${id}`, // put update
     remove: (id: number | string) => `/transactions/${id}`, // DELETE transaction
   },
   category: {

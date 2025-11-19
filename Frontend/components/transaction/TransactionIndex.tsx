@@ -19,7 +19,7 @@ import { useTransactionStore } from "@/store/transactionStore";
 import { useUserStore } from "@/store/userStore";
 import { format } from "date-fns";
 import CompactTransactionList from "./CompactTransactionList";
-import CategorySummaryChart from "./Category Summary Bar Chart";
+import CategorySummaryChart from "./CategorySummaryBarChart";
 import CategorySummaryChartSkeleton from "./skeleton/Category Summary Bar ChartSkeleton";
 import CompactTransactionListSkeleton from "./skeleton/CompactTransactionListSkeleton";
 import DashboardSummaryRowSkeleton from "./skeleton/DashboardSummaryRowSkeleton";

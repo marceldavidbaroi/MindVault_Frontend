@@ -68,28 +68,20 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   );
   const [loading, setLoading] = useState(false);
 
-  // Validation state
   const [errors, setErrors] = useState<
     Partial<Record<keyof CreateTransactionDto, string>>
   >({});
 
-  // Reset form and errors when dialog closes or initialData changes
+  // Reset form whenever initialData or currency changes
   useEffect(() => {
-    if (!open) {
-      setForm(
-        getDefaultForm(
-          accountStore.selectedAccount?.currency?.code,
-          initialData
-        )
-      );
-      setErrors({});
-    }
-  }, [open, initialData, accountStore.selectedAccount?.currency?.code]);
+    setForm(
+      getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
+    );
+    setErrors({});
+  }, [initialData, accountStore.selectedAccount?.currency?.code]);
 
   const handleChange = (key: keyof CreateTransactionDto, value: any) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-
-    // Clear error for field when changed
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
@@ -110,7 +102,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       newErrors.transactionDate = "Transaction date is required.";
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -134,14 +125,18 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
         recurringInterval: form.recurringInterval,
       };
 
-      await transactionStore.createTransaction(payload);
+      if (initialData?.id) {
+        await transactionStore.updateTransaction(initialData?.id!, payload);
+      } else {
+        await transactionStore.createTransaction(payload);
+      }
+
+      // Refresh transactions/dashboard
       if (accountStore.selectedAccountId != null) {
         const today = new Date();
         const todayStr = format(today, "yyyy-MM-dd");
         const month = parseInt(format(today, "MM"), 10);
         const year = parseInt(format(today, "yyyy"), 10);
-
-        accountStore.setSelectedAccountId(accountStore.selectedAccountId);
 
         const query: FindTransactionsDto = {
           creatorUserId: userStore.user?.id,
@@ -153,7 +148,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           sortOrder: "DESC",
         };
 
-        // 🔥 Run all requests in parallel
         await Promise.all([
           accountStore.getAccount(Number(accountStore.selectedAccountId)),
           summaryStore.getTransactionDashboardComparison(
@@ -161,16 +155,11 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           ),
           summaryStore.getDailyCategorySummary(
             Number(accountStore.selectedAccountId),
-            {
-              date: todayStr,
-            }
+            { date: todayStr }
           ),
           summaryStore.getMonthlyCategorySummary(
             Number(accountStore.selectedAccountId),
-            {
-              month,
-              year,
-            }
+            { month, year }
           ),
           transactionStore.getAllTransactions(
             Number(accountStore.selectedAccountId),
@@ -380,6 +369,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             </div>
           )}
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel
