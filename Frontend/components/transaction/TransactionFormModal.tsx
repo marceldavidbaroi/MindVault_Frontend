@@ -25,7 +25,12 @@ import { useCurrencyStore } from "@/store/currencyStore";
 import { format } from "date-fns";
 import { Calendar28 } from "../ui/date-picker";
 import { useTransactionStore } from "@/store/transactionStore";
-import { CreateTransactionDto } from "@/types/Transaction.type";
+import {
+  CreateTransactionDto,
+  FindTransactionsDto,
+} from "@/types/Transaction.type";
+import { useUserStore } from "@/store/userStore";
+import { useSummaryStore } from "@/store/summaryStore";
 
 interface TransactionDialogProps {
   open: boolean;
@@ -55,6 +60,8 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   const categoryStore = useCategoryStore();
   const currencyStore = useCurrencyStore();
   const transactionStore = useTransactionStore();
+  const userStore = useUserStore();
+  const summaryStore = useSummaryStore();
 
   const [form, setForm] = useState<Partial<CreateTransactionDto>>(
     getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
@@ -128,6 +135,50 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       };
 
       await transactionStore.createTransaction(payload);
+      if (accountStore.selectedAccountId != null) {
+        const today = new Date();
+        const todayStr = format(today, "yyyy-MM-dd");
+        const month = parseInt(format(today, "MM"), 10);
+        const year = parseInt(format(today, "yyyy"), 10);
+
+        accountStore.setSelectedAccountId(accountStore.selectedAccountId);
+
+        const query: FindTransactionsDto = {
+          creatorUserId: userStore.user?.id,
+          from: todayStr,
+          to: todayStr,
+          page: 1,
+          pageSize: 5,
+          sortBy: "updatedAt",
+          sortOrder: "DESC",
+        };
+
+        // 🔥 Run all requests in parallel
+        await Promise.all([
+          accountStore.getAccount(Number(accountStore.selectedAccountId)),
+          summaryStore.getTransactionDashboardComparison(
+            Number(accountStore.selectedAccountId)
+          ),
+          summaryStore.getDailyCategorySummary(
+            Number(accountStore.selectedAccountId),
+            {
+              date: todayStr,
+            }
+          ),
+          summaryStore.getMonthlyCategorySummary(
+            Number(accountStore.selectedAccountId),
+            {
+              month,
+              year,
+            }
+          ),
+          transactionStore.getAllTransactions(
+            Number(accountStore.selectedAccountId),
+            query
+          ),
+          accountStore.getAccountsWithAccess(),
+        ]);
+      }
 
       setForm(getDefaultForm(accountStore.selectedAccount?.currency?.code));
       setErrors({});

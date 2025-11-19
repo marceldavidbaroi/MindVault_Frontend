@@ -17,7 +17,7 @@ export default function CompactTransactionList() {
   };
 
   return (
-    <div className="w-full h-full p-3 space-y-3 backdrop-blur-md bg-background/60 rounded-xl border border-white/20 shadow-md">
+    <div className="w-full h-full p-3 space-y-2 backdrop-blur-md bg-background/60 rounded-xl border border-white/20 shadow-md">
       {transactions?.items.map((tx) => (
         <div
           key={tx.id}

@@ -20,6 +20,10 @@ import { useUserStore } from "@/store/userStore";
 import { format } from "date-fns";
 import CompactTransactionList from "./CompactTransactionList";
 import CategorySummaryChart from "./Category Summary Bar Chart";
+import CategorySummaryChartSkeleton from "./skeleton/Category Summary Bar ChartSkeleton";
+import CompactTransactionListSkeleton from "./skeleton/CompactTransactionListSkeleton";
+import DashboardSummaryRowSkeleton from "./skeleton/DashboardSummaryRowSkeleton";
+import AccountsListSkeleton from "./skeleton/AccountsListSkeleton";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -35,8 +39,11 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const transactionStore = useTransactionStore();
   const userStore = useUserStore();
 
+  const [initialLoading, setInitialLoading] = useState(false);
+
   useEffect(() => {
     const loadData = async () => {
+      setInitialLoading(true);
       // Only fetch static data once
       await Promise.all([
         accountStore.getAccountsWithAccess(),
@@ -47,35 +54,40 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
 
       // Fetch the selected account & dashboard summary only if ID exists
       if (selectedAccountId != null) {
-        await accountStore.getAccount(Number(selectedAccountId));
-        await summaryStore.getTransactionDashboardComparison(
-          Number(selectedAccountId)
-        );
-        await summaryStore.getDailyCategorySummary(Number(selectedAccountId), {
-          date: format(new Date(), "yyyy-MM-dd"),
-        });
-        await summaryStore.getMonthlyCategorySummary(
-          Number(selectedAccountId),
-          {
-            month: parseInt(format(today, "MM"), 10),
-            year: parseInt(format(today, "yyyy"), 10), // 2025
-          }
-        );
+        const today = new Date();
+        const todayStr = format(today, "yyyy-MM-dd");
+        const month = parseInt(format(today, "MM"), 10);
+        const year = parseInt(format(today, "yyyy"), 10);
+
         accountStore.setSelectedAccountId(selectedAccountId);
+
         const query: FindTransactionsDto = {
           creatorUserId: userStore.user?.id,
-          from: format(new Date(), "yyyy-MM-dd"),
-          to: format(new Date(), "yyyy-MM-dd"),
+          from: todayStr,
+          to: todayStr,
           page: 1,
           pageSize: 5,
           sortBy: "updatedAt",
           sortOrder: "DESC",
         };
-        await transactionStore.getAllTransactions(
-          Number(selectedAccountId),
-          query
-        );
+
+        // 🔥 Run all requests in parallel
+        await Promise.all([
+          accountStore.getAccount(Number(selectedAccountId)),
+          summaryStore.getTransactionDashboardComparison(
+            Number(selectedAccountId)
+          ),
+          summaryStore.getDailyCategorySummary(Number(selectedAccountId), {
+            date: todayStr,
+          }),
+          summaryStore.getMonthlyCategorySummary(Number(selectedAccountId), {
+            month,
+            year,
+          }),
+          transactionStore.getAllTransactions(Number(selectedAccountId), query),
+        ]);
       }
+      setInitialLoading(false);
     };
 
     loadData();
@@ -98,20 +110,18 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const handleExplorer = () => console.log("Explorer clicked");
 
   return (
-    <div className="h-[80vh] grid grid-cols-12 gap-3 p-3">
+    <div className="h-full grid grid-cols-12 gap-3 p-3">
       {/* LEFT SIDEBAR - GLASS */}
       <div
         className="
           col-span-2 h-full
           rounded-xl
-          backdrop-blur-md
-          bg-white/10 dark:bg-black/20
           flex flex-col
           overflow-y-auto
           scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-transparent
         "
       >
-        <AccountsList />
+        {initialLoading ? <AccountsListSkeleton /> : <AccountsList />}
       </div>
 
       {/* RIGHT SIDE */}
@@ -149,7 +159,11 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   "
         >
           <div className="flex gap-4 min-w-max">
-            <DashboardSummaryRow />
+            {initialLoading ? (
+              <DashboardSummaryRowSkeleton />
+            ) : (
+              <DashboardSummaryRow />
+            )}
           </div>
         </div>
 
@@ -157,27 +171,32 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
         <div className="grid grid-cols-10 gap-3">
           <div
             className="
-              col-span-5
-              rounded-xl
-              backdrop-blur-md
-              
-            "
+      col-span-10
+      md:col-span-5
+      rounded-xl
+      backdrop-blur-md
+    "
           >
-            <CompactTransactionList />
+            {initialLoading ? (
+              <CompactTransactionListSkeleton />
+            ) : (
+              <CompactTransactionList />
+            )}
           </div>
 
           <div
             className="
-              col-span-5
-              rounded-xl
-              backdrop-blur-md
-              bg-white/10 dark:bg-black/20
-              border border-white/20 dark:border-white/10
-              shadow-md
-              p-4
-            "
+      col-span-10
+      md:col-span-5
+      rounded-xl
+      backdrop-blur-md
+    "
           >
-            <CategorySummaryChart />
+            {initialLoading ? (
+              <CategorySummaryChartSkeleton />
+            ) : (
+              <CategorySummaryChart />
+            )}
           </div>
         </div>
       </div>

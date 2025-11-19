@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { useAccountStore } from "@/store/accountStore";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -26,18 +27,48 @@ const todayStr = format(new Date(), "yyyy-MM-dd");
 
 export default function CategorySummaryChart() {
   const summaryStore = useSummaryStore();
+  const accountStore = useAccountStore();
 
   const [view, setView] = useState<"daily" | "monthly">("daily");
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    new Date().getMonth() + 1
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
+  const [selectedDate, setSelectedDate] = useState(todayStr);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  // derive chartData from store
-  const chartData = React.useMemo(() => {
+  // Colors stored safely to avoid SSR errors
+  const [incomeColor, setIncomeColor] = useState("#4ade80"); // fallback
+  const [expenseColor, setExpenseColor] = useState("#f97316"); // fallback
+
+  // ⭐ Load CSS colors on client only
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const root = getComputedStyle(document.documentElement);
+
+    setIncomeColor(
+      root.getPropertyValue("--color-chart-4").trim() || "#4ade80"
+    );
+    setExpenseColor(
+      root.getPropertyValue("--color-chart-2").trim() || "#f97316"
+    );
+  }, []);
+
+  // ⭐ Fetch DAILY or MONTHLY summary
+  useEffect(() => {
+    if (view === "daily") {
+      summaryStore.getDailyCategorySummary(
+        Number(accountStore.selectedAccountId),
+        { date: String(selectedDate) }
+      );
+    } else {
+      summaryStore.getMonthlyCategorySummary(
+        Number(accountStore.selectedAccountId),
+        { month: Number(selectedMonth), year: Number(selectedYear) }
+      );
+    }
+  }, [view, selectedDate, selectedMonth, selectedYear]);
+
+  // ⭐ Prepare chart data (SSR-safe)
+  const chartData = useMemo(() => {
     const data =
       view === "daily"
         ? summaryStore.dailyCategorySummary || []
@@ -50,7 +81,7 @@ export default function CategorySummaryChart() {
           label: "Income / Expense",
           data: data.map((d) => d.totalAmount),
           backgroundColor: data.map((d) =>
-            d.type === "income" ? "#22c55e" : "#ef4444"
+            d.type === "income" ? incomeColor : expenseColor
           ),
           borderRadius: 8,
           barThickness: 24,
@@ -61,14 +92,14 @@ export default function CategorySummaryChart() {
     view,
     summaryStore.dailyCategorySummary,
     summaryStore.monthlyCategorySummary,
+    incomeColor,
+    expenseColor,
   ]);
 
   return (
-    <div className="w-full p-4 md:p-6 bg-background/50 backdrop-blur-md rounded-xl border border-white/20 shadow-lg">
+    <div className="w-full h-full p-4 md:p-6 bg-background/50 backdrop-blur-md rounded-xl border border-white/20 shadow-lg flex flex-col">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-        <h3 className="text-xl font-bold">Category Summary</h3>
-
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 flex-shrink-0">
         {/* Toggle */}
         <div className="flex space-x-1">
           <Button
@@ -96,13 +127,15 @@ export default function CategorySummaryChart() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={new Date(selectedDate)}
-                onSelect={(date) =>
-                  date && setSelectedDate(format(date, "yyyy-MM-dd"))
-                }
-              />
+              <div className="scale-90 origin-top">
+                <Calendar
+                  mode="single"
+                  selected={new Date(selectedDate)}
+                  onSelect={(date) =>
+                    date && setSelectedDate(format(date, "yyyy-MM-dd"))
+                  }
+                />
+              </div>
             </PopoverContent>
           </Popover>
         ) : (
@@ -135,11 +168,12 @@ export default function CategorySummaryChart() {
       </div>
 
       {/* Chart */}
-      <div className="w-full overflow-x-auto">
+      <div className="w-full flex-1 overflow-x-auto">
         <Bar
           data={chartData}
           options={{
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -150,10 +184,11 @@ export default function CategorySummaryChart() {
             },
             indexAxis: "y",
             scales: {
-              x: { beginAtZero: true, ticks: { stepSize: 10 } },
+              x: { beginAtZero: true },
               y: { ticks: { font: { size: 14 } } },
             },
           }}
+          height={400}
         />
       </div>
     </div>
