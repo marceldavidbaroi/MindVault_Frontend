@@ -4,13 +4,18 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useAccountStore } from "@/store/accountStore";
 import type { Account } from "@/types/Account.type";
+import { ArrowRightCircle } from "lucide-react"; // Better redirect icon
 
 export const MyAccountList: React.FC = () => {
   const accounts = useAccountStore((state) => state.accounts);
   const router = useRouter();
 
-  const handleClick = (account: Account) => {
+  const openAccount = (account: Account) => {
     router.push(`/finance/accounts/${account.id}`);
+  };
+
+  const openTransactionPage = (account: Account) => {
+    router.push(`/finance/transaction/${account.id}`);
   };
 
   if (!accounts?.length) {
@@ -26,12 +31,15 @@ export const MyAccountList: React.FC = () => {
       {accounts.map((account) => (
         <div
           key={account.id}
-          onClick={() => handleClick(account)}
           className="
-            bg-white/20 backdrop-blur-md border border-white/30 rounded-lg shadow hover:shadow-lg transition-shadow p-4 flex justify-between items-center cursor-pointer
+            relative bg-white/20 backdrop-blur-md border border-white/30 
+            rounded-lg shadow hover:shadow-lg transition-shadow
+            p-4 cursor-pointer
+            flex justify-between items-center
           "
         >
-          <div>
+          {/* Entire card clickable except the icon */}
+          <div onClick={() => openAccount(account)} className="flex-1">
             <h3 className="text-lg font-semibold text-foreground">
               #{account.id} {account.name}
             </h3>
@@ -44,8 +52,6 @@ export const MyAccountList: React.FC = () => {
                 {account.currencyCode.symbol})
               </p>
             )}
-          </div>
-          <div className="mt-2 sm:mt-0 text-right">
             <p className="text-sm font-medium text-foreground">
               Balance:{" "}
               {account.currencyCode
@@ -53,6 +59,17 @@ export const MyAccountList: React.FC = () => {
                 : account.balance}
             </p>
           </div>
+
+          {/* Transaction icon button */}
+          <button
+            onClick={() => openTransactionPage(account)}
+            className="
+              ml-4 p-2 rounded-full hover:bg-white/30 active:scale-95 
+              transition flex items-center justify-center
+            "
+          >
+            <ArrowRightCircle className="w-6 h-6 text-foreground" />
+          </button>
         </div>
       ))}
     </div>

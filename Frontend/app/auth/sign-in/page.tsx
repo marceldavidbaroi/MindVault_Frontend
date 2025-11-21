@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuthStore } from "@/store/authStore";
+import { useUserStore } from "@/store/userStore";
+import { useRoleStore } from "@/store/rolesStore";
 
 export default function SignInPage() {
   const authStore = useAuthStore();
@@ -22,11 +24,14 @@ export default function SignInPage() {
   const [username, setUsername] = useState("David");
   const [password, setPassword] = useState("David@123");
   const [showPassword, setShowPassword] = useState(false);
-
+  const userStore = useUserStore();
+  const roleStore = useRoleStore();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await authStore.signin(username, password);
+      await userStore.getProfile();
+      await roleStore.getAllRoles();
       router.push("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);

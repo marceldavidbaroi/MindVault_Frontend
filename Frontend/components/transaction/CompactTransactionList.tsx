@@ -81,7 +81,6 @@ export default function CompactTransactionList() {
 
         const query: FindTransactionsDto = {
           creatorUserId: userStore.user?.id,
-          from: todayStr,
           to: todayStr,
           page: 1,
           pageSize: 5,

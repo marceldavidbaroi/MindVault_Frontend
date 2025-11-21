@@ -24,6 +24,7 @@ import CategorySummaryChartSkeleton from "./skeleton/Category Summary Bar ChartS
 import CompactTransactionListSkeleton from "./skeleton/CompactTransactionListSkeleton";
 import DashboardSummaryRowSkeleton from "./skeleton/DashboardSummaryRowSkeleton";
 import AccountsListSkeleton from "./skeleton/AccountsListSkeleton";
+import { BulkTransactionDialog } from "./BulkTransactionFormModal";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -63,13 +64,12 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
 
         const query: FindTransactionsDto = {
           creatorUserId: userStore.user?.id,
-          from: todayStr,
-          to: todayStr,
           page: 1,
           pageSize: 5,
           sortBy: "updatedAt",
           sortOrder: "DESC",
         };
+        console.log("this is the user ", userStore.user);
 
         // 🔥 Run all requests in parallel
         await Promise.all([
@@ -94,6 +94,7 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   }, [selectedAccountId]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
   // For edit mode (null = create mode)
   const [editData, setEditData] = useState<CreateTransactionDto | undefined>(
@@ -106,7 +107,9 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
     setDialogOpen(true);
   };
 
-  const handleBulkTransaction = () => console.log("Bulk Transaction clicked");
+  const handleBulkTransaction = () => {
+    setBulkDialogOpen(true);
+  };
   const handleExplorer = () => console.log("Explorer clicked");
 
   return (
@@ -205,6 +208,10 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         initialData={editData}
+      />
+      <BulkTransactionDialog
+        open={bulkDialogOpen}
+        onClose={() => setBulkDialogOpen(false)}
       />
     </div>
   );

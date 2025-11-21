@@ -20,6 +20,7 @@ export interface User {
 export interface UpdateProfileDto {
   email: string;
 }
+
 export interface getPasskeyDto {
   password: string;
 }
@@ -41,15 +42,18 @@ export interface SecurityQuestion {
 export interface DeleteSecurityQuestionDto {
   password: string;
 }
+
 export interface resetPasswordPasskeyDto {
   username: string;
   passkey: string;
   newPassword: string;
 }
+
 export interface changePasswordDto {
   oldPassword: string;
   newPassword: string;
 }
+
 export interface VerifyAnswerDto {
   username: string;
   answers: {
@@ -62,6 +66,7 @@ export interface VerifyAnswerDto {
 export interface UserState {
   // ---------------- USER PROFILE ----------------
   user: User | undefined;
+  initialized: boolean; // ✅ track if profile is already loaded
   setUser: (user: User) => void;
 
   // ---------------- PASSKEY ----------------
@@ -70,7 +75,7 @@ export interface UserState {
   getPasskey: (data: getPasskeyDto) => Promise<ApiResponse<any>>;
 
   // ---------------- SECURITY QUESTIONS ----------------
-  securityQuestions: SecurityQuestion[]; // ✅ clean type
+  securityQuestions: SecurityQuestion[];
   setSecurityQuestions: (questions: SecurityQuestion[]) => void;
 
   getSecurityQuestion: () => Promise<ApiResponse<SecurityQuestion[]>>;
@@ -87,7 +92,7 @@ export interface UserState {
   ) => Promise<ApiResponse<void>>;
 
   // ---------------- PROFILE OPERATIONS ----------------
-  getProfile: () => Promise<ApiResponse<User>>;
+  getProfile: () => Promise<ApiResponse<any>>;
   updateProfile: (data: UpdateProfileDto) => Promise<ApiResponse<any>>;
   updatePreference: (data: any) => Promise<ApiResponse<any>>;
   resetPasswordPasskey: (data: resetPasswordPasskeyDto) => Promise<any>;

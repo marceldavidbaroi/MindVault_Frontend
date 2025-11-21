@@ -4,10 +4,10 @@ import {
   Transaction,
   TransactionMeta,
   CreateTransactionDto,
-  BulkTransactionDto,
   FindTransactionsDto,
   ApiResponse,
   PaginatedTransactions,
+  BulkCreateTransaction,
 } from "@/types/Transaction.type";
 
 interface TransactionState {
@@ -45,7 +45,7 @@ interface TransactionState {
 
   /** Bulk create transactions */
   createBulkTransactions: (
-    data: BulkTransactionDto
+    data: BulkCreateTransaction
   ) => Promise<Transaction[] | null>;
 }
 

@@ -70,10 +70,34 @@ export interface TransactionItemDto {
   amount: number | undefined;
 }
 
-export interface BulkTransactionDto {
-  date: string; // ISO string
-  type: TransactionType;
-  transactions: TransactionItemDto[];
+export interface BulkTransactionItem {
+  /** Transaction amount as string to preserve precision */
+  amount: string;
+  /** Optional category ID */
+  categoryId?: number;
+  /** Optional transaction date YYYY-MM-DD */
+  transactionDate?: string;
+  /** Optional external reference ID */
+  externalRefId?: string;
+}
+
+export interface BulkCreateTransaction {
+  /** Account ID for all transactions */
+  accountId: number;
+  /** Transaction type for all transactions (income/expense) */
+  type?: "income" | "expense";
+  /** Currency code */
+  currencyCode?: string;
+  /** Description for all transactions */
+  description?: string;
+  /** Status for all transactions */
+  status?: "pending" | "completed" | "failed";
+  /** Recurring flag */
+  recurring?: boolean;
+  /** Recurring interval for all transactions */
+  recurringInterval?: "daily" | "weekly" | "monthly" | "yearly";
+  /** List of individual transactions */
+  transactions: BulkTransactionItem[];
 }
 
 export interface FindTransactionsDto {

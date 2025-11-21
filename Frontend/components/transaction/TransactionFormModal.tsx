@@ -140,8 +140,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
 
         const query: FindTransactionsDto = {
           creatorUserId: userStore.user?.id,
-          from: todayStr,
-          to: todayStr,
           page: 1,
           pageSize: 5,
           sortBy: "updatedAt",

@@ -32,7 +32,7 @@ export const AccountTypeListSkeleton: React.FC = () => {
             {Array.from({ length: itemsPerScope }).map((_, j) => (
               <li
                 key={j}
-                className="bg-white/20 backdrop-blur-md border border-white/30 rounded-lg shadow p-4 flex justify-between items-center animate-pulse"
+                className="bg-chart-1/20 backdrop-blur-md border border-chart-1/30 rounded-lg shadow p-4 flex justify-between items-center animate-pulse"
               >
                 <div className="space-y-1 w-full max-w-[80%]">
                   <Skeleton className="h-5 w-40 rounded-md" />

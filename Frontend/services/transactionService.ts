@@ -2,10 +2,10 @@ import { fetcher } from "@/lib/fetcher";
 import { ENDPOINTS } from "@/config/api";
 import {
   CreateTransactionDto,
-  BulkTransactionDto,
   FindTransactionsDto,
   Transaction,
   PaginatedTransactions,
+  BulkCreateTransaction,
 } from "@/types/Transaction.type"; // <-- make a types file for these
 
 interface ApiResponse<T> {
@@ -45,7 +45,7 @@ export const transactionService = {
     }),
 
   /** BULK CREATE transactions */
-  createBulk: (data: BulkTransactionDto) =>
+  createBulk: (data: BulkCreateTransaction) =>
     fetcher<ApiResponse<Transaction[]>>(ENDPOINTS.transaction.createBulk, {
       method: "POST",
       body: JSON.stringify(data),
