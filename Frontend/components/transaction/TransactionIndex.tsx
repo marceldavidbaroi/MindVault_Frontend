@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import AccountsList from "./AccountList";
-import { AccessAccount } from "@/types/Account.type";
 import { useAccountStore } from "@/store/accountStore";
 import { Button } from "@/components/ui/button";
 import { Plus, Layers, Compass } from "lucide-react";
@@ -25,6 +24,7 @@ import CompactTransactionListSkeleton from "./skeleton/CompactTransactionListSke
 import DashboardSummaryRowSkeleton from "./skeleton/DashboardSummaryRowSkeleton";
 import AccountsListSkeleton from "./skeleton/AccountsListSkeleton";
 import { BulkTransactionDialog } from "./BulkTransactionFormModal";
+import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -39,97 +39,57 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const summaryStore = useSummaryStore();
   const transactionStore = useTransactionStore();
   const userStore = useUserStore();
+  const { refreshAll } = useTransactionRefresh();
 
   const [initialLoading, setInitialLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [editData, setEditData] = useState<CreateTransactionDto | undefined>(
+    undefined
+  );
 
+  // Initial load
   useEffect(() => {
     const loadData = async () => {
       setInitialLoading(true);
-      // Only fetch static data once
+
+      // Load static data
       await Promise.all([
         accountStore.getAccountsWithAccess(),
         categoryStore.getAllCategories(),
         currencyStore.getAllCurrencies(),
       ]);
-      const today = new Date();
 
-      // Fetch the selected account & dashboard summary only if ID exists
       if (selectedAccountId != null) {
-        const today = new Date();
-        const todayStr = format(today, "yyyy-MM-dd");
-        const month = parseInt(format(today, "MM"), 10);
-        const year = parseInt(format(today, "yyyy"), 10);
-
         accountStore.setSelectedAccountId(selectedAccountId);
-
-        const query: FindTransactionsDto = {
-          creatorUserId: userStore.user?.id,
-          page: 1,
-          pageSize: 5,
-          sortBy: "updatedAt",
-          sortOrder: "DESC",
-        };
-        console.log("this is the user ", userStore.user);
-
-        // 🔥 Run all requests in parallel
-        await Promise.all([
-          accountStore.getAccount(Number(selectedAccountId)),
-          summaryStore.getTransactionDashboardComparison(
-            Number(selectedAccountId)
-          ),
-          summaryStore.getDailyCategorySummary(Number(selectedAccountId), {
-            date: todayStr,
-          }),
-          summaryStore.getMonthlyCategorySummary(Number(selectedAccountId), {
-            month,
-            year,
-          }),
-          transactionStore.getAllTransactions(Number(selectedAccountId), query),
-        ]);
+        await refreshAll(Number(selectedAccountId)); // use composable for initial fetch
       }
+
       setInitialLoading(false);
     };
 
     loadData();
   }, [selectedAccountId]);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
-
-  // For edit mode (null = create mode)
-  const [editData, setEditData] = useState<CreateTransactionDto | undefined>(
-    undefined
-  );
-
-  // open create dialog
+  // Open create dialog
   const handleAddTransaction = () => {
     setEditData(undefined);
     setDialogOpen(true);
   };
 
-  const handleBulkTransaction = () => {
-    setBulkDialogOpen(true);
-  };
+  const handleBulkTransaction = () => setBulkDialogOpen(true);
   const handleExplorer = () => console.log("Explorer clicked");
 
   return (
     <div className="h-full grid grid-cols-12 gap-3 p-3">
-      {/* LEFT SIDEBAR - GLASS */}
-      <div
-        className="
-          col-span-2 h-full
-          rounded-xl
-          flex flex-col
-          overflow-y-auto
-          scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-transparent
-        "
-      >
+      {/* LEFT SIDEBAR */}
+      <div className="col-span-2 h-full rounded-xl flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-transparent">
         {initialLoading ? <AccountsListSkeleton /> : <AccountsList />}
       </div>
 
       {/* RIGHT SIDE */}
       <div className="col-span-10 grid grid-rows-[5%_25%_70%] gap-3">
-        {/* BUTTONS ROW - RIGHT ALIGNED */}
+        {/* BUTTONS */}
         <div className="flex justify-end gap-1">
           <Button
             className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
@@ -153,14 +113,8 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
           </Button>
         </div>
 
-        {/* TOP SECTION - GLASS */}
-        <div
-          className="
-    rounded-xl
-    backdrop-blur-md
-    overflow-x-auto
-  "
-        >
+        {/* TOP SECTION */}
+        <div className="rounded-xl backdrop-blur-md overflow-x-auto">
           <div className="flex gap-4 min-w-max">
             {initialLoading ? (
               <DashboardSummaryRowSkeleton />
@@ -170,16 +124,9 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
           </div>
         </div>
 
-        {/* BOTTOM SECTION (split 5 + 5) */}
+        {/* BOTTOM SECTION */}
         <div className="grid grid-cols-10 gap-3">
-          <div
-            className="
-      col-span-10
-      md:col-span-5
-      rounded-xl
-      backdrop-blur-md
-    "
-          >
+          <div className="col-span-10 md:col-span-5 rounded-xl backdrop-blur-md">
             {initialLoading ? (
               <CompactTransactionListSkeleton />
             ) : (
@@ -187,14 +134,7 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
             )}
           </div>
 
-          <div
-            className="
-      col-span-10
-      md:col-span-5
-      rounded-xl
-      backdrop-blur-md
-    "
-          >
+          <div className="col-span-10 md:col-span-5 rounded-xl backdrop-blur-md">
             {initialLoading ? (
               <CategorySummaryChartSkeleton />
             ) : (
@@ -209,6 +149,7 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
         onClose={() => setDialogOpen(false)}
         initialData={editData}
       />
+
       <BulkTransactionDialog
         open={bulkDialogOpen}
         onClose={() => setBulkDialogOpen(false)}

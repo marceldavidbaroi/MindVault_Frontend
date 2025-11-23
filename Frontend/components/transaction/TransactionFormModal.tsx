@@ -31,6 +31,7 @@ import {
 } from "@/types/Transaction.type";
 import { useUserStore } from "@/store/userStore";
 import { useSummaryStore } from "@/store/summaryStore";
+import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
 
 interface TransactionDialogProps {
   open: boolean;
@@ -62,6 +63,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   const transactionStore = useTransactionStore();
   const userStore = useUserStore();
   const summaryStore = useSummaryStore();
+  const { refreshAll } = useTransactionRefresh();
 
   const [form, setForm] = useState<Partial<CreateTransactionDto>>(
     getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
@@ -131,41 +133,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
         await transactionStore.createTransaction(payload);
       }
 
-      // Refresh transactions/dashboard
-      if (accountStore.selectedAccountId != null) {
-        const today = new Date();
-        const todayStr = format(today, "yyyy-MM-dd");
-        const month = parseInt(format(today, "MM"), 10);
-        const year = parseInt(format(today, "yyyy"), 10);
-
-        const query: FindTransactionsDto = {
-          creatorUserId: userStore.user?.id,
-          page: 1,
-          pageSize: 5,
-          sortBy: "updatedAt",
-          sortOrder: "DESC",
-        };
-
-        await Promise.all([
-          accountStore.getAccount(Number(accountStore.selectedAccountId)),
-          summaryStore.getTransactionDashboardComparison(
-            Number(accountStore.selectedAccountId)
-          ),
-          summaryStore.getDailyCategorySummary(
-            Number(accountStore.selectedAccountId),
-            { date: todayStr }
-          ),
-          summaryStore.getMonthlyCategorySummary(
-            Number(accountStore.selectedAccountId),
-            { month, year }
-          ),
-          transactionStore.getAllTransactions(
-            Number(accountStore.selectedAccountId),
-            query
-          ),
-          accountStore.getAccountsWithAccess(),
-        ]);
-      }
+      await refreshAll(Number(accountStore.selectedAccountId));
 
       setForm(getDefaultForm(accountStore.selectedAccount?.currency?.code));
       setErrors({});
@@ -183,18 +151,20 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className="sm:max-w-lg max-h-[70vh] overflow-y-auto
-             scrollbar-thin scrollbar-track-transparent scrollbar-thumb-rounded-md
-             scrollbar-thumb-neutral-400 hover:scrollbar-thumb-neutral-500"
+        className="sm:max-w-lg max-h-[75vh] overflow-y-auto 
+  scrollbar-thin scrollbar-thumb-neutral-400 scrollbar-track-transparent
+  p-6 space-y-6 rounded-xl"
       >
-        <DialogHeader>
-          <DialogTitle>
+        <DialogHeader className="pb-2 border-b">
+          <DialogTitle className="text-lg font-semibold">
             {initialData ? "Edit Transaction" : "Create Transaction"}
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+
+        {/* Form content */}
+        <div className="grid gap-6">
           {/* Account */}
-          <div>
+          <div className="space-y-2">
             <Label>Account</Label>
             <Select
               value={
@@ -204,7 +174,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               }
               onValueChange={(v) => handleChange("accountId", Number(v))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Select Account" />
               </SelectTrigger>
               <SelectContent>
@@ -219,12 +189,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Type */}
-          <div>
+          <div className="space-y-2">
             <Label>Type</Label>
             <RadioGroup
               value={form.type}
               onValueChange={(v) => handleChange("type", v)}
-              className="flex gap-3"
+              className="flex gap-6 pt-1"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="income" id="type-income" />
@@ -239,13 +209,13 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Category */}
-          <div>
+          <div className="space-y-2">
             <Label>Category</Label>
             <Select
               value={form.categoryId ? String(form.categoryId) : undefined}
               onValueChange={(v) => handleChange("categoryId", Number(v))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>
@@ -260,13 +230,13 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Currency */}
-          <div>
+          <div className="space-y-2">
             <Label>Currency</Label>
             <Select
               value={form.currencyCode}
               onValueChange={(v) => handleChange("currencyCode", v)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Select Currency" />
               </SelectTrigger>
               <SelectContent>
@@ -280,12 +250,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Status */}
-          <div>
+          <div className="space-y-2">
             <Label>Status</Label>
             <RadioGroup
               value={form.status}
               onValueChange={(v) => handleChange("status", v)}
-              className="flex gap-3"
+              className="flex flex-wrap gap-4 pt-1"
             >
               {["pending", "cleared", "void", "failed"].map((s) => (
                 <div key={s} className="flex items-center space-x-2">
@@ -297,10 +267,11 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Amount */}
-          <div>
+          <div className="space-y-2">
             <Label>Amount</Label>
             <Input
               type="text"
+              className="h-10"
               value={form.amount || ""}
               onChange={(e) => handleChange("amount", e.target.value)}
               placeholder="0.00"
@@ -309,7 +280,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Date */}
-          <div>
+          <div className="space-y-2">
             <Label>Date</Label>
             <Calendar28
               value={form.transactionDate}
@@ -319,9 +290,10 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* Description */}
-          <div>
+          <div className="space-y-2">
             <Label>Description</Label>
             <Input
+              className="h-10"
               value={form.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               placeholder="Optional"
@@ -329,9 +301,10 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           </div>
 
           {/* External Ref */}
-          <div>
+          <div className="space-y-2">
             <Label>External Ref</Label>
             <Input
+              className="h-10"
               value={form.externalRefId || ""}
               onChange={(e) => handleChange("externalRefId", e.target.value)}
               placeholder="Optional"
@@ -350,12 +323,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
 
           {/* Recurring Interval */}
           {form.recurring && (
-            <div>
+            <div className="space-y-2">
               <Label>Recurring Interval</Label>
               <RadioGroup
                 value={form.recurringInterval}
                 onValueChange={(v) => handleChange("recurringInterval", v)}
-                className="flex gap-3"
+                className="flex gap-6 pt-1"
               >
                 {["daily", "weekly", "monthly", "yearly"].map((r) => (
                   <div key={r} className="flex items-center space-x-2">
@@ -368,7 +341,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="pt-4 border-t">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
