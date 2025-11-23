@@ -48,28 +48,35 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
     undefined
   );
 
+  useEffect(() => {
+    accountStore.setSelectedAccountId(selectedAccountId);
+  }, [selectedAccountId]);
+
   // Initial load
   useEffect(() => {
     const loadData = async () => {
-      setInitialLoading(true);
+      if (accountStore.selectedAccountId) {
+        console.log("this is hut", selectedAccountId);
 
-      // Load static data
-      await Promise.all([
-        accountStore.getAccountsWithAccess(),
-        categoryStore.getAllCategories(),
-        currencyStore.getAllCurrencies(),
-      ]);
+        setInitialLoading(true);
 
-      if (selectedAccountId != null) {
-        accountStore.setSelectedAccountId(selectedAccountId);
+        // Load static data
+
+        await Promise.all([
+          accountStore.getAccountsWithAccess(),
+          categoryStore.getAllCategories(),
+          currencyStore.getAllCurrencies(),
+        ]);
+        // accountStore.setSelectedAccountId(selectedAccountId);
+
         await refreshAll(Number(selectedAccountId)); // use composable for initial fetch
-      }
 
-      setInitialLoading(false);
+        setInitialLoading(false);
+      }
     };
 
     loadData();
-  }, [selectedAccountId]);
+  }, [accountStore.selectedAccountId]);
 
   // Open create dialog
   const handleAddTransaction = () => {

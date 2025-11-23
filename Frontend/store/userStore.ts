@@ -32,14 +32,11 @@ export const useUserStore = create<UserState>((set, get) => ({
   getProfile: async (): Promise<ApiResponse<User>> => {
     try {
       const res = await userService.get();
-      console.log("userStoer update", res.data);
       if (res.success) {
         set({ user: res.data });
-        console.log("here we are");
 
         return { success: true, data: res.data, message: "" }; // always include message
       } else {
-        console.log("chat the fuck");
         return {
           success: false,
           data: undefined,

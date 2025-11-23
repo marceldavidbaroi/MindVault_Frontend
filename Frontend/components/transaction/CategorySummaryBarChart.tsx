@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -25,6 +25,29 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const todayStr = format(new Date(), "yyyy-MM-dd");
 
+// ---------------------------------------------------------------------
+// ⭐ Custom Hook to track previous state
+// ---------------------------------------------------------------------
+
+/**
+ * Stores and returns the previous value of a prop or state.
+ * @param value The current value to track.
+ * @returns The value from the previous render, or undefined on the first render.
+ */
+export function usePrevious<T>(value: T) {
+  const ref = useRef<T | undefined>(undefined);
+
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref.current;
+}
+
+// ---------------------------------------------------------------------
+// ⭐ Main Component
+// ---------------------------------------------------------------------
+
 export default function CategorySummaryChart() {
   const summaryStore = useSummaryStore();
   const accountStore = useAccountStore();
@@ -35,15 +58,19 @@ export default function CategorySummaryChart() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   // Colors stored safely to avoid SSR errors
-  const [incomeColor, setIncomeColor] = useState("#4ade80"); // fallback
-  const [expenseColor, setExpenseColor] = useState("#f97316"); // fallback
+  const [incomeColor, setIncomeColor] = useState("#4ade80");
+  const [expenseColor, setExpenseColor] = useState("#f97316");
+
+  // ⭐ Track previous states
+  const prevView = usePrevious(view);
+  const prevDate = usePrevious(selectedDate);
+  const prevMonth = usePrevious(selectedMonth);
+  const prevYear = usePrevious(selectedYear);
 
   // ⭐ Load CSS colors on client only
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     const root = getComputedStyle(document.documentElement);
-
     setIncomeColor(
       root.getPropertyValue("--color-chart-4").trim() || "#4ade80"
     );
@@ -52,20 +79,60 @@ export default function CategorySummaryChart() {
     );
   }, []);
 
-  // ⭐ Fetch DAILY or MONTHLY summary
+  // ---------------------------------------------------------------------
+  // ⭐ Fetch DAILY or MONTHLY summary - Controlled Update
+  // ---------------------------------------------------------------------
   useEffect(() => {
-    if (view === "daily") {
-      summaryStore.getDailyCategorySummary(
-        Number(accountStore.selectedAccountId),
-        { date: String(selectedDate) }
-      );
-    } else {
-      summaryStore.getMonthlyCategorySummary(
-        Number(accountStore.selectedAccountId),
-        { month: Number(selectedMonth), year: Number(selectedYear) }
-      );
+    // 1. Skip the API call on the initial mount
+    // prevView will be undefined on the very first render cycle.
+    if (prevView === undefined) {
+      console.log("Initial load detected, skipping API call.");
+      return;
     }
-  }, [view, selectedDate, selectedMonth, selectedYear]);
+
+    // 2. Check if ANY dependency has changed since the last render
+    const hasDependenciesChanged =
+      prevView !== view ||
+      prevDate !== selectedDate ||
+      prevMonth !== selectedMonth ||
+      prevYear !== selectedYear;
+
+    // 3. Only run the API call if a dependency has changed
+    if (hasDependenciesChanged) {
+      console.log(
+        "Dependency change detected, calling API:",
+        view,
+        selectedDate,
+        selectedMonth,
+        selectedYear
+      );
+
+      const accountId = Number(accountStore.selectedAccountId);
+
+      if (view === "daily") {
+        summaryStore.getDailyCategorySummary(accountId, {
+          date: String(selectedDate),
+        });
+      } else {
+        summaryStore.getMonthlyCategorySummary(accountId, {
+          month: Number(selectedMonth),
+          year: Number(selectedYear),
+        });
+      }
+    }
+  }, [
+    view,
+    selectedDate,
+    selectedMonth,
+    selectedYear,
+    // Include previous states to ensure the effect reruns when they are updated
+    prevView,
+    prevDate,
+    prevMonth,
+    prevYear,
+    summaryStore,
+    accountStore.selectedAccountId,
+  ]);
 
   // ⭐ Prepare chart data (SSR-safe)
   const chartData = useMemo(() => {

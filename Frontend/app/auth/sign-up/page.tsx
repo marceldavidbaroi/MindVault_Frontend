@@ -43,7 +43,6 @@ export default function SignUpPage() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log({ username, password });
       // TODO: Call your API here
       await authStore.signup(username, password);
       router.push("/auth/sign-in");

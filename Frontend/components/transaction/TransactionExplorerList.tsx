@@ -66,7 +66,6 @@ const TransactionExplorerList: React.FC<TransactionExplorerListProps> = ({
       type: editData.type,
     };
 
-    console.log(payload);
     await transactionStore.updateTransaction(editData.id!, payload);
     setEditingId(null);
   };
@@ -74,7 +73,6 @@ const TransactionExplorerList: React.FC<TransactionExplorerListProps> = ({
   const handleDelete = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setDeleteModalOpen(true);
-    console.log("Delete transaction:", transaction);
   };
 
   const handleConfirmDelete = () => {
