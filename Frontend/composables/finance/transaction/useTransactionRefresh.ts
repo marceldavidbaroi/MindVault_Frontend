@@ -11,16 +11,28 @@ export const useTransactionRefresh = () => {
   const summaryStore = useSummaryStore();
   const transactionStore = useTransactionStore();
   const userStore = useUserStore();
+
   const refreshAll = async (accountId: number) => {
     if (!accountId || !userStore.user?.id) return;
 
+    // 1️⃣ Try to fetch the account first
+    let account;
+    try {
+      account = await accountStore.getAccount(accountId);
+    } catch (error: any) {
+      console.error("Failed to fetch account:", error);
+      // You could also set a state like accountNotFound = true
+      return; // ❌ Early exit if account not found / inaccessible
+    }
+
+    // 2️⃣ Account exists, proceed with other calls
     const today = new Date();
     const todayStr = format(today, "yyyy-MM-dd");
     const month = parseInt(format(today, "MM"), 10);
     const year = parseInt(format(today, "yyyy"), 10);
 
     const query: FindTransactionsDto = {
-      creatorUserId: userStore.user?.id,
+      creatorUserId: userStore.user.id,
       page: 1,
       pageSize: 5,
       sortBy: "updatedAt",
@@ -29,7 +41,6 @@ export const useTransactionRefresh = () => {
     };
 
     await Promise.all([
-      accountStore.getAccount(accountId),
       summaryStore.getTransactionDashboardComparison(accountId),
       summaryStore.getDailyCategorySummary(accountId, { date: todayStr }),
       summaryStore.getMonthlyCategorySummary(accountId, { month, year }),
