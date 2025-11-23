@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AccountsList from "./AccountList";
 import { useAccountStore } from "@/store/accountStore";
 import { Button } from "@/components/ui/button";
@@ -43,21 +43,27 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
     accountStore.setSelectedAccountId(selectedAccountId);
   }, [selectedAccountId]);
 
-  // Initial load
+  const prevAccountIdRef = useRef<any>(null);
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (accountStore.selectedAccountId) {
-          setInitialLoading(true);
+        const currentId = accountStore.selectedAccountId;
 
-          await Promise.all([
-            accountStore.getAccountsWithAccess(),
-            categoryStore.getAllCategories(),
-            currencyStore.getAllCurrencies(),
-          ]);
+        // Only proceed if the account ID really changed
+        if (!currentId || prevAccountIdRef.current === currentId) return;
 
-          await refreshAll(Number(selectedAccountId));
-        }
+        prevAccountIdRef.current = currentId; // update ref
+
+        setInitialLoading(true);
+
+        await Promise.all([
+          accountStore.getAccountsWithAccess(),
+          categoryStore.getAllCategories(),
+          currencyStore.getAllCurrencies(),
+        ]);
+
+        await refreshAll(Number(currentId));
       } catch {
         console.log("some error occurred");
       } finally {
