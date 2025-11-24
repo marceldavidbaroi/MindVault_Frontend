@@ -39,6 +39,7 @@ interface TransactionDialogProps {
   open: boolean;
   onClose: () => void;
   initialData?: CreateTransactionDto;
+  triggerRefreshAll?: Boolean;
 }
 
 const getDefaultForm = (
@@ -58,6 +59,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   open,
   onClose,
   initialData,
+  triggerRefreshAll = true,
 }) => {
   const accountStore = useAccountStore();
   const categoryStore = useCategoryStore();
@@ -65,7 +67,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   const transactionStore = useTransactionStore();
   const userStore = useUserStore();
   const summaryStore = useSummaryStore();
-  const { refreshAll } = useTransactionRefresh();
+  const { refreshAll, refreshTransactions } = useTransactionRefresh();
 
   const [form, setForm] = useState<Partial<CreateTransactionDto>>(
     getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
@@ -130,8 +132,14 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       } else {
         await transactionStore.createTransaction(payload);
       }
-
-      await refreshAll(Number(accountStore.selectedAccountId));
+      if (triggerRefreshAll) {
+        await refreshAll(Number(accountStore.selectedAccountId));
+      } else {
+        await refreshTransactions(
+          Number(accountStore.selectedAccountId),
+          transactionStore.filters
+        );
+      }
       setForm(getDefaultForm(accountStore.selectedAccount?.currency?.code));
       setErrors({});
       onClose();

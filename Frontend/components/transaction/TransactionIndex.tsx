@@ -19,6 +19,7 @@ import DashboardSummaryRowSkeleton from "./skeleton/DashboardSummaryRowSkeleton"
 import AccountsListSkeleton from "./skeleton/AccountsListSkeleton";
 import { BulkTransactionDialog } from "./BulkTransactionFormModal";
 import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
+import { useRouter } from "next/navigation";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -31,6 +32,7 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const categoryStore = useCategoryStore();
   const currencyStore = useCurrencyStore();
   const summaryStore = useSummaryStore();
+  const router = useRouter();
 
   const { refreshAll } = useTransactionRefresh();
 
@@ -117,8 +119,17 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
               >
                 <Layers size={16} />
               </Button>
-              <Button className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110">
-                <Compass size={16} />
+              <Button
+                className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
+                onClick={() => {
+                  if (accountStore.selectedAccountId) {
+                    router.push(
+                      `/finance/transaction-explorer/${accountStore.selectedAccountId}`
+                    );
+                  }
+                }}
+              >
+                <Compass size={16} className="cursor-pointer" />{" "}
               </Button>
             </div>
 

@@ -35,11 +35,6 @@ export const TransactionExplorerFilter: React.FC = () => {
   const today = new Date().toISOString().split("T")[0];
   const [collapsed, setCollapsed] = useState(false); // ← new state
 
-  useEffect(() => {
-    categoryStore.getAllCategories();
-    accountStore.getAccountsWithAccess();
-  }, []);
-
   const updateFilters = async (updates: Partial<FindTransactionsDto>) => {
     const updatedFilters: FindTransactionsDto = {
       ...transactionStore.filters,
