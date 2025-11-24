@@ -12,20 +12,30 @@ export const useTransactionRefresh = () => {
   const transactionStore = useTransactionStore();
   const userStore = useUserStore();
 
+  // Helper: remove undefined, null, or empty string fields
+  const cleanQuery = (obj: Record<string, any>) => {
+    return Object.fromEntries(
+      Object.entries(obj).filter(
+        ([_, v]) => v !== undefined && v !== null && v !== ""
+      )
+    ) as FindTransactionsDto;
+  };
+
+  // -----------------------------------------
+  // 1️⃣ Full Refresh (Dashboard + Summary + Tx)
+  // -----------------------------------------
   const refreshAll = async (accountId: number) => {
     if (!accountId || !userStore.user?.id) return;
 
-    // 1️⃣ Try to fetch the account first
+    // Fetch account first to ensure access
     let account;
     try {
       account = await accountStore.getAccount(accountId);
     } catch (error: any) {
       console.error("Failed to fetch account:", error);
-      // You could also set a state like accountNotFound = true
-      return; // ❌ Early exit if account not found / inaccessible
+      return;
     }
 
-    // 2️⃣ Account exists, proceed with other calls
     const today = new Date();
     const todayStr = format(today, "yyyy-MM-dd");
     const month = parseInt(format(today, "MM"), 10);
@@ -49,5 +59,23 @@ export const useTransactionRefresh = () => {
     ]);
   };
 
-  return { refreshAll };
+  // -----------------------------------------------------
+  // 2️⃣ Only refresh transactions (clean query)
+  // -----------------------------------------------------
+  const refreshTransactions = async (
+    accountId: number,
+    customQuery: FindTransactionsDto
+  ) => {
+    if (!accountId || !userStore.user?.id) return;
+
+    const finalQuery = cleanQuery(customQuery);
+
+    try {
+      await transactionStore.getAllTransactions(accountId, finalQuery);
+    } catch (err) {
+      console.error("Failed to refresh transactions:", err);
+    }
+  };
+
+  return { refreshAll, refreshTransactions };
 };

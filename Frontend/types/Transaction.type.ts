@@ -41,12 +41,12 @@ export interface Transaction {
   };
 }
 
-export interface PaginatedTransactions {
-  items: Transaction[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
+// export interface PaginatedTransactions {
+//   items: Transaction[];
+//   total: number;
+//   page: number;
+//   pageSize: number;
+// }
 
 /** DTOs for API requests */
 
@@ -133,7 +133,7 @@ export interface SummaryData {
 export interface TransactionMeta {
   total: number;
   page: number;
-  limit: number;
+  pageSize: number;
 }
 
 /** Generic API response */

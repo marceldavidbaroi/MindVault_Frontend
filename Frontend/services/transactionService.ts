@@ -4,7 +4,6 @@ import {
   CreateTransactionDto,
   FindTransactionsDto,
   Transaction,
-  PaginatedTransactions,
   BulkCreateTransaction,
 } from "@/types/Transaction.type"; // <-- make a types file for these
 
@@ -15,7 +14,7 @@ interface ApiResponse<T> {
   meta?: {
     total: number;
     page: number;
-    limit: number;
+    pageSize: number;
   };
 }
 

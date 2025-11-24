@@ -6,17 +6,21 @@ import {
   CreateTransactionDto,
   FindTransactionsDto,
   ApiResponse,
-  PaginatedTransactions,
   BulkCreateTransaction,
 } from "@/types/Transaction.type";
 
+const today = new Date().toISOString().split("T")[0];
+
 interface TransactionState {
-  transactions: PaginatedTransactions | null;
+  transactions: Transaction[] | [];
   meta: TransactionMeta | null;
+  /** Filter state */
+  filters: FindTransactionsDto;
+  setFilters: (filters: Partial<FindTransactionsDto>) => void;
 
   /** State updaters */
   setTransactions: (
-    transactions: PaginatedTransactions,
+    transactions: Transaction[],
     meta?: TransactionMeta
   ) => void;
 
@@ -50,19 +54,35 @@ interface TransactionState {
 }
 
 export const useTransactionStore = create<TransactionState>((set, get) => ({
-  transactions: null,
-  meta: null,
+  transactions: [],
+  meta: { page: 1, pageSize: 25, total: 0 },
+  filters: {
+    page: 1,
+    pageSize: 25,
+    sortBy: "updatedAt",
+    sortOrder: "DESC",
+    to: today,
+  },
+  setFilters: (filters) =>
+    set((state) => ({
+      filters: { ...state.filters, ...filters },
+    })),
 
   setTransactions: (transactions, meta) =>
     set({ transactions, meta: meta || null }),
 
   getAllTransactions: async (accountId, params) => {
     try {
-      const res: ApiResponse<PaginatedTransactions> =
-        await transactionService.getAll(accountId, params);
+      const res: ApiResponse<Transaction[]> = await transactionService.getAll(
+        accountId,
+        params
+      );
 
       if (res.success) {
-        set({ transactions: res.data, meta: res.meta ?? null });
+        set({
+          transactions: res.data,
+          meta: res.meta ?? { page: 1, pageSize: 25, total: 0 },
+        });
       }
     } catch (error) {
       console.error("Failed to fetch transactions:", error);

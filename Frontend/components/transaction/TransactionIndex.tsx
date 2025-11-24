@@ -34,7 +34,7 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
 
   const { refreshAll } = useTransactionRefresh();
 
-  const [initialLoading, setInitialLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editData, setEditData] = useState<CreateTransactionDto | undefined>();

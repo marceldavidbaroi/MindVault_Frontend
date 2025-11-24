@@ -118,7 +118,7 @@ export default function CompactTransactionList() {
 
   return (
     <div className="w-full h-full p-3 space-y-2 backdrop-blur-md bg-background/60 rounded-xl border border-white/20 shadow-md">
-      {transactionStore.transactions?.items.map((tx) => (
+      {transactionStore.transactions.map((tx) => (
         <div
           key={tx.id}
           className="flex items-center justify-between p-3 rounded-lg bg-background/40 backdrop-blur-md border border-white/10 hover:bg-background/60 transition"

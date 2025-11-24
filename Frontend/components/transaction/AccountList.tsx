@@ -15,12 +15,14 @@ import { AccessAccount } from "@/types/Account.type";
 
 interface AccountsListProps {
   mode?: "normal" | "mini";
-  accountsData?: AccessAccount[]; // optional prop
+  accountsData?: AccessAccount[];
+  redirectBase?: string; // <-- NEW optional route override
 }
 
 export default function AccountsList({
   mode = "normal",
   accountsData,
+  redirectBase = "/finance/transaction", // <-- Default redirect base
 }: AccountsListProps) {
   const router = useRouter();
   const {
@@ -30,14 +32,9 @@ export default function AccountsList({
     setSelectedAccountId,
   } = useAccountStore();
 
-  // If props are passed, update the store
   useEffect(() => {
     if (accountsData && accountsData.length > 0) {
       setAccessAccounts(accountsData);
-
-      // If selectedAccountId exists in store, keep it
-
-      // Otherwise, default to first account
     }
   }, [accountsData]);
 
@@ -53,7 +50,9 @@ export default function AccountsList({
 
   const onSelect = (item: AccessAccount) => {
     setSelectedAccountId(item.id);
-    router.push(`/finance/transaction/${item.id}`);
+
+    // 🔥 Use custom redirectBase or fall back to default
+    router.push(`${redirectBase}/${item.id}`);
   };
 
   // MINI MODE
