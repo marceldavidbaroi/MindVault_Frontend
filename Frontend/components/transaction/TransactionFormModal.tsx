@@ -19,19 +19,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { useAccountStore } from "@/store/accountStore";
 import { useCategoryStore } from "@/store/categoryStore";
 import { useCurrencyStore } from "@/store/currencyStore";
-import { format } from "date-fns";
-import { Calendar28 } from "../ui/date-picker";
 import { useTransactionStore } from "@/store/transactionStore";
-import {
-  CreateTransactionDto,
-  FindTransactionsDto,
-} from "@/types/Transaction.type";
 import { useUserStore } from "@/store/userStore";
 import { useSummaryStore } from "@/store/summaryStore";
 import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
+import { CreateTransactionDto } from "@/types/Transaction.type";
 
 interface TransactionDialogProps {
   open: boolean;
@@ -69,12 +71,10 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
     getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
   );
   const [loading, setLoading] = useState(false);
-
   const [errors, setErrors] = useState<
     Partial<Record<keyof CreateTransactionDto, string>>
   >({});
 
-  // Reset form whenever initialData or currency changes
   useEffect(() => {
     setForm(
       getDefaultForm(accountStore.selectedAccount?.currency?.code, initialData)
@@ -93,7 +93,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof CreateTransactionDto, string>> = {};
-
     if (!accountStore.selectedAccountId)
       newErrors.accountId = "Account is required.";
     if (!form.type) newErrors.type = "Transaction type is required.";
@@ -102,7 +101,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       newErrors.amount = "Amount is required.";
     if (!form.transactionDate)
       newErrors.transactionDate = "Transaction date is required.";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -128,13 +126,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       };
 
       if (initialData?.id) {
-        await transactionStore.updateTransaction(initialData?.id!, payload);
+        await transactionStore.updateTransaction(initialData.id, payload);
       } else {
         await transactionStore.createTransaction(payload);
       }
 
       await refreshAll(Number(accountStore.selectedAccountId));
-
       setForm(getDefaultForm(accountStore.selectedAccount?.currency?.code));
       setErrors({});
       onClose();
@@ -150,18 +147,14 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-lg max-h-[75vh] overflow-y-auto 
-  scrollbar-thin scrollbar-thumb-neutral-400 scrollbar-track-transparent
-  p-6 space-y-6 rounded-xl"
-      >
+      <DialogContent className="sm:max-w-lg max-h-[75vh] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-400 scrollbar-track-transparent p-6 space-y-6 rounded-xl">
         <DialogHeader className="pb-2 border-b">
           <DialogTitle className="text-lg font-semibold">
             {initialData ? "Edit Transaction" : "Create Transaction"}
           </DialogTitle>
         </DialogHeader>
 
-        {/* Form content */}
+        {/* Form */}
         <div className="grid gap-6">
           {/* Account */}
           <div className="space-y-2">
@@ -279,13 +272,38 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             {renderError("amount")}
           </div>
 
-          {/* Date */}
-          <div className="space-y-2">
-            <Label>Date</Label>
-            <Calendar28
-              value={form.transactionDate}
-              onChange={(date) => handleChange("transactionDate", date)}
-            />
+          {/* Date with Popover Calendar */}
+          <div className="flex flex-col">
+            <Label htmlFor="transaction-date" className="mb-1">
+              Transaction Date
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full text-left">
+                  {form.transactionDate
+                    ? format(new Date(form.transactionDate), "PPP")
+                    : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-[9999]">
+                <Calendar
+                  mode="single"
+                  selected={
+                    form.transactionDate
+                      ? new Date(form.transactionDate)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    if (date)
+                      handleChange(
+                        "transactionDate",
+                        format(date, "yyyy-MM-dd")
+                      );
+                  }}
+                  className="rounded-md border shadow-sm"
+                />
+              </PopoverContent>
+            </Popover>
             {renderError("transactionDate")}
           </div>
 

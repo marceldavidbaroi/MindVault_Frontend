@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Calendar28 } from "../ui/date-picker";
 import { format } from "date-fns";
 import { useAccountStore } from "@/store/accountStore";
 import { useCategoryStore } from "@/store/categoryStore";
@@ -27,7 +26,13 @@ import { useCurrencyStore } from "@/store/currencyStore";
 import { useTransactionStore } from "@/store/transactionStore";
 import { Trash2, Plus, AlertCircle } from "lucide-react";
 import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
-
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  Portal,
+} from "@radix-ui/react-popover";
+import { Calendar } from "@/components/ui/calendar"; // shadCN Calendar
 // --- API Types ---
 export interface BulkTransactionItem {
   amount: string;
@@ -489,12 +494,36 @@ export const BulkTransactionDialog: React.FC<BulkTransactionDialogProps> = ({
                   <Label htmlFor={`date-${idx}`} className="mb-1">
                     Transaction Date
                   </Label>
-                  <Calendar28
-                    value={tx.transactionDate}
-                    onChange={(d) =>
-                      handleTransactionChange(idx, "transactionDate", d)
-                    }
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full text-left">
+                        {tx.transactionDate
+                          ? format(new Date(tx.transactionDate), "PPP")
+                          : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-[9999]">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          tx.transactionDate
+                            ? new Date(tx.transactionDate)
+                            : undefined
+                        }
+                        onSelect={(date) => {
+                          if (date)
+                            handleTransactionChange(
+                              idx,
+                              "transactionDate",
+                              format(date, "yyyy-MM-dd")
+                            );
+                        }}
+                        className="rounded-md border shadow-sm"
+
+                        // Use buttonVariant="outline" if your Calendar supports it
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* External Ref */}
