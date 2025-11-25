@@ -16,48 +16,80 @@ export const ENDPOINTS = {
       `/auth/forgot-password/${username}/verify`,
   },
   summary: {
-    // transactionDashboard: "/summary/transaction-dashboard",
+    // Combined summaries
     dashboard_comparison: (accountId: number | string) =>
       `/summaries/${accountId}/comparison`,
     dailyCategorySummary: (accountId: number) =>
-      `/summaries/${accountId}/daily`,
+      `/category-summaries/${accountId}/daily`,
     monthlyCategorySummary: (accountId: number) =>
-      `/summaries/${accountId}/monthly`,
+      `/category-summaries/${accountId}/monthly`,
+    dailySummary: {
+      get: (accountId: number) => `/daily-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/daily-summaries/${accountId}/comparison`,
+      lastNDays: (accountId: number) =>
+        `/daily-summaries/${accountId}/last-n-days`,
+    },
+    weeklySummary: {
+      get: (accountId: number) => `/weekly-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/weekly-summaries/${accountId}/comparison`,
+      lastNWeeks: (accountId: number) =>
+        `/weekly-summaries/${accountId}/last-n-weeks`,
+    },
+    monthlySummary: {
+      get: (accountId: number) => `/monthly-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/monthly-summaries/${accountId}/comparison`,
+      lastNMonths: (accountId: number) =>
+        `/monthly-summaries/${accountId}/last-n-months`,
+    },
+    yearlySummary: {
+      get: (accountId: number) => `/yearly-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/yearly-summaries/${accountId}/comparison`,
+      lastNYears: (accountId: number) =>
+        `/yearly-summaries/${accountId}/last-n-years`,
+    },
+    trendInsights: {
+      trend: (accountId: number) => `/trend-insights/${accountId}/trend`,
+      topCategories: (accountId: number) =>
+        `/trend-insights/${accountId}/top-categories`,
+    },
   },
   transaction: {
-    // all: "/transactions", // GET all transactions with filters & pagination
     getAll: (accountId: number) => `/transactions/${accountId}/transactions`,
-    getOne: (id: number | string) => `/transactions/${id}`, // GET single transaction
-    create: "/transactions", // POST create transaction
-    createBulk: "/transactions/bulk", // POST bulk create
-    update: (id: number | string) => `/transactions/${id}`, // put update
-    remove: (id: number | string) => `/transactions/${id}`, // DELETE transaction
+    getOne: (id: number | string) => `/transactions/${id}`,
+    create: "/transactions",
+    createBulk: "/transactions/bulk",
+    update: (id: number | string) => `/transactions/${id}`,
+    remove: (id: number | string) => `/transactions/${id}`,
   },
   category: {
-    all: "/finance/categories", // GET all categories (with optional filters)
-    getOne: (id: number | string) => `/finance/categories/${id}`, // GET single category
-    create: "/finance/categories", // POST create category
-    update: (id: number | string) => `/finance/categories/${id}`, // PATCH update category
-    remove: (id: number | string) => `/finance/categories/${id}`, // DELETE category
-    stats: "/finance/categories/stats/all", // GET category stats
+    all: "/finance/categories",
+    getOne: (id: number | string) => `/finance/categories/${id}`,
+    create: "/finance/categories",
+    update: (id: number | string) => `/finance/categories/${id}`,
+    remove: (id: number | string) => `/finance/categories/${id}`,
+    stats: "/finance/categories/stats/all",
   },
   accounts: {
-    create: "/finance/accounts", // POST create new account
-    my: "/finance/accounts/my", // GET accounts for current user
-    access: "/finance/accounts/access", // GET accounts with roles for current user
-    update: (id: number | string) => `/finance/accounts/${id}`, // PUT update account
-    remove: (id: number | string) => `/finance/accounts/${id}`, // DELETE account
-    getOne: (id: number | string) => `/finance/accounts/${id}`, // GET single account
+    create: "/finance/accounts",
+    my: "/finance/accounts/my",
+    access: "/finance/accounts/access",
+    update: (id: number | string) => `/finance/accounts/${id}`,
+    remove: (id: number | string) => `/finance/accounts/${id}`,
+    getOne: (id: number | string) => `/finance/accounts/${id}`,
     types: {
-      all: "/finance/accounts/types/all", // GET all active account types
+      all: "/finance/accounts/types/all",
     },
     roles: {
-      assign: (id: number | string) => `/finance/accounts/${id}/roles`, // POST assign role to user
-      list: (id: number | string) => `/finance/accounts/${id}/roles`, // GET roles assigned to account
+      assign: (id: number | string) => `/finance/accounts/${id}/roles`,
+      list: (id: number | string) => `/finance/accounts/${id}/roles`,
       update: (id: number | string, userId: number | string) =>
-        `/finance/accounts/${id}/roles/${userId}`, // PUT update user role for account
+        `/finance/accounts/${id}/roles/${userId}`,
       remove: (id: number | string, userId: number | string) =>
-        `/finance/accounts/${id}/roles/${userId}`, // DELETE remove user role from account
+        `/finance/accounts/${id}/roles/${userId}`,
     },
   },
   user: {
