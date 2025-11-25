@@ -24,6 +24,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"; // ✅ NOT lucide-react
 import { Button } from "@/components/ui/button"; // ✅ Correct shadCN button
 import { format } from "date-fns";
+import { ChevronDown, ChevronUp, Filter } from "lucide-react";
 
 export const TransactionExplorerFilter: React.FC = () => {
   const categoryStore = useCategoryStore();
@@ -33,7 +34,7 @@ export const TransactionExplorerFilter: React.FC = () => {
   const router = useRouter();
 
   const today = new Date().toISOString().split("T")[0];
-  const [collapsed, setCollapsed] = useState(false); // ← new state
+  const [collapsed, setCollapsed] = useState(true); // ← new state
 
   const updateFilters = async (updates: Partial<FindTransactionsDto>) => {
     const updatedFilters: FindTransactionsDto = {
@@ -60,18 +61,48 @@ export const TransactionExplorerFilter: React.FC = () => {
       );
 
   return (
-    <div className="bg-background rounded-xl shadow-sm p-3">
+    <div className="bg-background rounded-sm shadow-sm p-3">
       {/* Collapse/Expand Button */}
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-medium">Filters</h2>
-        <button
-          type="button"
-          className="px-2 py-1 text-sm border rounded hover:bg-gray-100"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          {collapsed ? "Show Filters" : "Hide Filters"}
-        </button>
-      </div>
+      {/* Collapse / Expand Header */}
+      {!collapsed ? (
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex flex-col">
+            <h2 className="text-lg font-medium">Filters</h2>
+
+            {accountStore.selectedAccount?.balance !== null && (
+              <span className="text-sm text-muted-foreground font-normal">
+                Balance: {accountStore.selectedAccount?.balance}{" "}
+                {accountStore.selectedAccount?.currency?.code}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-1 px-2 py-1 text-sm border rounded hover:bg-accent"
+            onClick={() => setCollapsed(true)}
+          >
+            <ChevronUp size={16} />
+            Hide
+          </button>
+        </div>
+      ) : (
+        <div className="mb-2 flex justify-between">
+          {accountStore.selectedAccount?.balance !== null && (
+            <span className="text-base font-bold">
+              Balance: {accountStore.selectedAccount?.balance}{" "}
+              {accountStore.selectedAccount?.currency?.code}
+            </span>
+          )}
+          <button
+            type="button"
+            className="flex items-center gap-1 px-3 py-1 text-sm border rounded-full hover:bg-accent"
+            onClick={() => setCollapsed(false)}
+          >
+            <Filter size={16} />
+            <ChevronDown size={16} />
+          </button>
+        </div>
+      )}
 
       {!collapsed && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">

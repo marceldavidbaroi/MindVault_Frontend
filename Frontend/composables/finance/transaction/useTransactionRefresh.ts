@@ -1,7 +1,11 @@
 // composables/useTransactionRefresh.ts
+"use client";
+
 import { useAccountStore } from "@/store/accountStore";
 import { useSummaryStore } from "@/store/summaryStore";
 import { useTransactionStore } from "@/store/transactionStore";
+import { useCategoryStore } from "@/store/categoryStore";
+import { useCurrencyStore } from "@/store/currencyStore";
 import { format } from "date-fns";
 import { FindTransactionsDto } from "@/types/Transaction.type";
 import { useUserStore } from "@/store/userStore";
@@ -10,9 +14,13 @@ export const useTransactionRefresh = () => {
   const accountStore = useAccountStore();
   const summaryStore = useSummaryStore();
   const transactionStore = useTransactionStore();
+  const categoryStore = useCategoryStore();
+  const currencyStore = useCurrencyStore();
   const userStore = useUserStore();
 
-  // Helper: remove undefined, null, or empty string fields
+  // -----------------------------------------
+  // Helper: remove undefined or empty values
+  // -----------------------------------------
   const cleanQuery = (obj: Record<string, any>) => {
     return Object.fromEntries(
       Object.entries(obj).filter(
@@ -22,12 +30,37 @@ export const useTransactionRefresh = () => {
   };
 
   // -----------------------------------------
+  // 🔹 New: Load base reference data ONCE
+  // -----------------------------------------
+  const loadBaseData = async () => {
+    const tasks = [];
+
+    if (!accountStore.accessAccounts?.length) {
+      tasks.push(accountStore.getAccountsWithAccess());
+    }
+
+    if (!categoryStore.categories?.length) {
+      tasks.push(categoryStore.getAllCategories());
+    }
+
+    if (!currencyStore.currencies?.length) {
+      tasks.push(currencyStore.getAllCurrencies());
+    }
+
+    if (tasks.length === 0) return; // nothing to fetch
+
+    await Promise.all(tasks);
+  };
+
+  // -----------------------------------------
   // 1️⃣ Full Refresh (Dashboard + Summary + Tx)
   // -----------------------------------------
   const refreshAll = async (accountId: number) => {
     if (!accountId || !userStore.user?.id) return;
 
-    // Fetch account first to ensure access
+    // Ensure essential data is loaded first
+
+    // Fetch account to validate access
     let account;
     try {
       account = await accountStore.getAccount(accountId);
@@ -55,7 +88,6 @@ export const useTransactionRefresh = () => {
       summaryStore.getDailyCategorySummary(accountId, { date: todayStr }),
       summaryStore.getMonthlyCategorySummary(accountId, { month, year }),
       transactionStore.getAllTransactions(accountId, query),
-      accountStore.getAccountsWithAccess(),
     ]);
   };
 
@@ -77,5 +109,5 @@ export const useTransactionRefresh = () => {
     }
   };
 
-  return { refreshAll, refreshTransactions };
+  return { refreshAll, refreshTransactions, loadBaseData };
 };

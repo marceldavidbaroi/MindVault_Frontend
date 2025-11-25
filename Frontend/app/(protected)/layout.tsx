@@ -13,9 +13,10 @@ const Layout = async ({ children }: LayoutProps) => {
   // 🔹 Await cookies
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
 
   // 🔹 Redirect if no access token
-  if (!accessToken) {
+  if (!accessToken && !refreshToken) {
     redirect("/auth/sign-in");
   }
 

@@ -16,6 +16,7 @@ import { Compass, Layers, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { TransactionDialog } from "./TransactionFormModal";
 import { BulkTransactionDialog } from "./BulkTransactionFormModal";
+import TransactionExplorerSkeleton from "./skeleton/TransactionExplorerIndexSkeleton";
 
 const TransactionExplorerIndex = () => {
   const transactionStore = useTransactionStore();
@@ -25,6 +26,7 @@ const TransactionExplorerIndex = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editData, setEditData] = useState<CreateTransactionDto | undefined>();
+  const [loading, setLoading] = useState(true);
 
   const selectedAccountId = accountStore.selectedAccountId;
 
@@ -33,6 +35,8 @@ const TransactionExplorerIndex = () => {
   // -------------------------
   const fetchTransactions = async (customFilters?: FindTransactionsDto) => {
     if (!selectedAccountId) return;
+
+    setLoading(true);
 
     // Merge store filters with any custom ones
     const filtersToUse: FindTransactionsDto = {
@@ -51,8 +55,11 @@ const TransactionExplorerIndex = () => {
     // Update store filters
     transactionStore.setFilters(query);
 
-    // Fetch transactions
-    Promise.all([await refreshTransactions(Number(selectedAccountId), query)]);
+    try {
+      await refreshTransactions(Number(selectedAccountId), query);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // -------------------------
@@ -63,7 +70,7 @@ const TransactionExplorerIndex = () => {
 
     fetchTransactions({
       page: 1,
-      pageSize: 5,
+      pageSize: 25,
       sortBy: "updatedAt",
       sortOrder: "DESC",
       to: todayStr,
@@ -79,6 +86,8 @@ const TransactionExplorerIndex = () => {
     <div className="space-y-4">
       {/* Filters */}
       <TransactionExplorerFilter />
+
+      {/* Action Buttons */}
       <div className="flex justify-end gap-1">
         <Button
           className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
@@ -106,21 +115,23 @@ const TransactionExplorerIndex = () => {
         </Button>
       </div>
 
-      {/* List */}
-      <TransactionExplorerList />
+      {/* List / Skeleton */}
+      {loading ? <TransactionExplorerSkeleton /> : <TransactionExplorerList />}
 
       {/* Pagination */}
-      <Pagination
-        total={transactionStore.meta?.total ?? 0}
-        page={transactionStore.filters.page ?? 1}
-        pageSize={transactionStore.filters.pageSize ?? 25}
-        onPageChange={(newPage) => {
-          fetchTransactions({ page: newPage });
-        }}
-        onPageSizeChange={(newSize) => {
-          fetchTransactions({ page: 1, pageSize: newSize }); // reset to page 1 when size changes
-        }}
-      />
+      {!loading && (
+        <Pagination
+          total={transactionStore.meta?.total ?? 0}
+          page={transactionStore.filters.page ?? 1}
+          pageSize={transactionStore.filters.pageSize ?? 25}
+          onPageChange={(newPage) => {
+            fetchTransactions({ page: newPage });
+          }}
+          onPageSizeChange={(newSize) => {
+            fetchTransactions({ page: 1, pageSize: newSize });
+          }}
+        />
+      )}
 
       <TransactionDialog
         open={dialogOpen}

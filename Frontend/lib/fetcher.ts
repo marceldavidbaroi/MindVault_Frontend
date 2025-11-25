@@ -43,7 +43,9 @@ export async function fetcher<T>(
     ...(options.headers || {}),
   };
 
-  if (req?.headers?.cookie) headers["cookie"] = req.headers.cookie;
+  if (req?.headers?.cookie) {
+    (headers as Record<string, string>)["cookie"] = req.headers.cookie;
+  }
 
   const fullUrl = API_BASE_URL + url;
   const { setResponse } = useNotificationStore.getState(); // notification setter

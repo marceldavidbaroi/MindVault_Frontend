@@ -3,10 +3,14 @@
 import React from "react";
 import { useTransactionStore } from "@/store/transactionStore";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 export const TransactionExplorerList: React.FC = () => {
+  const router = useRouter();
   const transactionStore = useTransactionStore();
-
+  const goToTransaction = (id: number) => {
+    router.push(`/finance/transaction/details/${id}`);
+  };
   return (
     <div className="flex flex-col p-2 text-sm">
       {/* Header */}
@@ -26,7 +30,7 @@ export const TransactionExplorerList: React.FC = () => {
         return (
           <div
             key={tx.id}
-            onClick={() => console.log(tx.id)}
+            onClick={() => goToTransaction(tx.id)}
             className="cursor-pointer grid grid-cols-5 gap-2 items-center p-2 backdrop-blur-md transition hover:scale-[1.01] duration-150 rounded-md border border-white/10"
           >
             <div>{format(new Date(tx.transactionDate), "MMM dd, yyyy")}</div>
