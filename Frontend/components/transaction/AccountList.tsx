@@ -16,22 +16,30 @@ import { AccessAccount } from "@/types/Account.type";
 interface AccountsListProps {
   mode?: "normal" | "mini";
   accountsData?: AccessAccount[];
-  redirectBase?: string; // <-- NEW optional route override
+  redirectBase?: string;
+  enableRedirect?: boolean; // <-- NEW FLAG
 }
 
 export default function AccountsList({
   mode = "normal",
   accountsData,
-  redirectBase = "/finance/transaction", // <-- Default redirect base
+  redirectBase = "/finance/transaction",
+  enableRedirect = true, // <-- DEFAULT TRUE
 }: AccountsListProps) {
   const router = useRouter();
   const {
     accessAccounts,
     selectedAccountId,
+    getAccountsWithAccess,
     setAccessAccounts,
     setSelectedAccountId,
   } = useAccountStore();
 
+  useEffect(() => {
+    if (accessAccounts.length === 0) {
+      getAccountsWithAccess();
+    }
+  }, []);
   useEffect(() => {
     if (accountsData && accountsData.length > 0) {
       setAccessAccounts(accountsData);
@@ -51,8 +59,10 @@ export default function AccountsList({
   const onSelect = (item: AccessAccount) => {
     setSelectedAccountId(item.id);
 
-    // 🔥 Use custom redirectBase or fall back to default
-    router.push(`${redirectBase}/${item.id}`);
+    // 🔥 Redirect only if enabled
+    if (enableRedirect) {
+      router.push(`${redirectBase}/${item.id}`);
+    }
   };
 
   // MINI MODE
@@ -64,7 +74,13 @@ export default function AccountsList({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="flex items-center gap-2 backdrop-blur-md bg-primary/10 border-primary/20">
+          <Button
+            className="
+              flex items-center gap-2 
+              bg-primary text-primary-foreground 
+              hover:bg-primary/80 
+            "
+          >
             {selectedAccount ? selectedAccount.account.name : "Select Account"}
             <ChevronDown size={16} />
           </Button>
@@ -72,21 +88,35 @@ export default function AccountsList({
 
         <DropdownMenuContent
           align="start"
-          className="w-56 backdrop-blur-md bg-background/80 border border-primary/20 shadow-xl"
+          className="
+            w-56 
+            backdrop-blur-md 
+            bg-background/80 
+            border border-primary/20 
+            shadow-xl
+          "
         >
           {accounts.map((item) => (
             <DropdownMenuItem
               key={item.id}
               onClick={() => onSelect(item)}
-              className={`flex flex-col items-start py-2 ${
-                item.id === selectedAccountId ? "bg-primary/20" : ""
-              }`}
+              className={`
+                flex flex-col items-start py-2
+                bg-primary/10 
+                hover:bg-primary/20
+                cursor-pointer
+                ${item.id === selectedAccountId ? "bg-primary/30" : ""}
+              `}
             >
-              <span className="font-medium text-sm">{item.account.name}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="font-medium text-sm text-primary-900 dark:text-primary-200">
+                {item.account.name}
+              </span>
+
+              <span className="text-xs text-primary-700 dark:text-primary-300">
                 Balance: {item.account.balance}
               </span>
-              <span className="text-xs text-muted-foreground">
+
+              <span className="text-xs text-primary-700 dark:text-primary-300">
                 Role: {item.role.displayName}
               </span>
             </DropdownMenuItem>
@@ -104,9 +134,11 @@ export default function AccountsList({
           <li
             key={item.id}
             onClick={() => onSelect(item)}
-            className={`px-3 py-2 cursor-pointer select-none hover:bg-primary/10 transition-all text-sm ${
-              item.id === selectedAccountId ? "bg-primary/20" : ""
-            }`}
+            className={`
+              px-3 py-2 cursor-pointer select-none
+              hover:bg-primary/10 transition-all text-sm
+              ${item.id === selectedAccountId ? "bg-primary/20" : ""}
+            `}
           >
             <div className="flex justify-between items-center">
               <span className="font-medium text-foreground truncate">
