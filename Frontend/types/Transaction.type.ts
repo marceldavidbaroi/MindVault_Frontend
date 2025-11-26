@@ -143,3 +143,26 @@ export interface ApiResponse<T> {
   data: T;
   meta?: TransactionMeta;
 }
+export interface Statement {
+  openingBalance: string;
+  transactions: StatementTransaction[];
+  closingBalance: string;
+}
+
+export interface StatementTransaction {
+  id: number;
+  category: {
+    id: number;
+    name: string;
+  };
+  type: "income" | "expense";
+  amount: number;
+  currency: {
+    code: string;
+    symbol: string;
+  };
+  transactionDate: string;
+  description: string | null;
+  status: "pending" | "cleared" | string; // extend if needed
+  runningBalance: string;
+}

@@ -11,6 +11,8 @@ import {
   CalendarCheck,
   TrendingUp,
   PieChart,
+  Info,
+  FileText,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -57,6 +59,12 @@ const cards = [
       "Flexible summaries for custom N days, weeks, months or years.",
     icon: LineChart,
     href: "/finance/reports/summary/custom-range",
+  },
+  {
+    title: "Statements",
+    description: "View all your transaction statements and reports.",
+    icon: FileText,
+    href: "/finance/reports/statements",
   },
 ];
 

@@ -64,6 +64,8 @@ export const ENDPOINTS = {
     createBulk: "/transactions/bulk",
     update: (id: number | string) => `/transactions/${id}`,
     remove: (id: number | string) => `/transactions/${id}`,
+    statements: (accountId: number | string) =>
+      `/transactions/${accountId}/statement`,
   },
   category: {
     all: "/finance/categories",

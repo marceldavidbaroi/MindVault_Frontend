@@ -7,6 +7,7 @@ import {
   FindTransactionsDto,
   ApiResponse,
   BulkCreateTransaction,
+  Statement, // <-- add if you have a Statement type
 } from "@/types/Transaction.type";
 
 const today = new Date().toISOString().split("T")[0];
@@ -14,6 +15,15 @@ const today = new Date().toISOString().split("T")[0];
 interface TransactionState {
   transactions: Transaction[] | [];
   meta: TransactionMeta | null;
+
+  /** Statements */
+  statements: Statement | null;
+  setStatements: (statements: Statement) => void;
+  getStatements: (
+    accountId: number,
+    params: { from: string; to: string }
+  ) => Promise<ApiResponse<Statement>>;
+
   /** Filter state */
   filters: FindTransactionsDto;
   setFilters: (filters: Partial<FindTransactionsDto>) => void;
@@ -30,7 +40,7 @@ interface TransactionState {
     params?: FindTransactionsDto
   ) => Promise<void>;
 
-  /** Fetch a single transaction by ID */
+  /** Fetch a single transaction */
   getTransaction: (id: number) => Promise<Transaction | null>;
 
   /** Create a new transaction */
@@ -38,7 +48,7 @@ interface TransactionState {
     data: CreateTransactionDto
   ) => Promise<Transaction | null>;
 
-  /** Update an existing transaction */
+  /** Update a transaction */
   updateTransaction: (
     id: number,
     data: Partial<CreateTransactionDto>
@@ -56,6 +66,37 @@ interface TransactionState {
 export const useTransactionStore = create<TransactionState>((set, get) => ({
   transactions: [],
   meta: { page: 1, pageSize: 25, total: 0 },
+
+  /** ---------------------- STATEMENTS ---------------------- */
+  statements: null,
+  setStatements: (statements) => set({ statements }),
+
+  getStatements: async (accountId, params) => {
+    try {
+      const res: ApiResponse<Statement> =
+        await transactionService.getStatements(accountId, params);
+
+      if (res.success) {
+        set({ statements: res.data });
+      }
+
+      return res;
+    } catch (error) {
+      console.error("Failed to fetch statements:", error);
+
+      return {
+        success: false,
+        message: "Failed to fetch statements",
+        data: {
+          openingBalance: "0.00",
+          transactions: [],
+          closingBalance: "0.00",
+        }, // ← satisfies ApiResponse<Statement>
+      };
+    }
+  },
+
+  /** ---------------------- FILTERS ---------------------- */
   filters: {
     page: 1,
     pageSize: 25,
@@ -63,10 +104,13 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     sortOrder: "DESC",
     to: today,
   },
+
   setFilters: (filters) =>
     set((state) => ({
       filters: { ...state.filters, ...filters },
     })),
+
+  /** ---------------------- TRANSACTIONS ---------------------- */
 
   setTransactions: (transactions, meta) =>
     set({ transactions, meta: meta || null }),

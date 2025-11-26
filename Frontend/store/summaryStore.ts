@@ -33,6 +33,7 @@ interface SummaryState {
   lastNYears: any;
 
   trendInsights: any;
+  topCategories: any;
 
   setTransactionDashboardComparison: (
     tdComparison: DashboardComparison
@@ -61,6 +62,7 @@ interface SummaryState {
   setLastNYears: (data: any) => void;
 
   setTrendInsights: (data: any) => void;
+  setTopCategories: (data: any) => void;
 
   getTransactionDashboardComparison: (id: number) => Promise<void>;
   getDailyCategorySummary: (
@@ -188,6 +190,7 @@ export const useSummaryStore = create<SummaryState>((set) => ({
   lastNYears: null,
 
   trendInsights: null,
+  topCategories: [],
 
   setTransactionDashboardComparison: (tdComparison) => set({ tdComparison }),
   setDailyCategorySummary: (dailyCategorySummary) =>
@@ -212,6 +215,7 @@ export const useSummaryStore = create<SummaryState>((set) => ({
   setLastNYears: (data) => set({ lastNYears: data }),
 
   setTrendInsights: (data) => set({ trendInsights: data }),
+  setTopCategories: (data) => set({ setTopCategories: data }),
 
   getTransactionDashboardComparison: async (id: number) => {
     try {
@@ -378,7 +382,7 @@ export const useSummaryStore = create<SummaryState>((set) => ({
         accountId,
         params
       );
-      if (res.success) set({ trendInsights: res.data });
+      if (res.success) set({ topCategories: res.data }); // <-- set topCategories separately
     } catch (err) {
       console.error(err);
     }

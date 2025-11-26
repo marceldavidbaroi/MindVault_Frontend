@@ -5,6 +5,7 @@ import {
   FindTransactionsDto,
   Transaction,
   BulkCreateTransaction,
+  Statement,
 } from "@/types/Transaction.type"; // <-- make a types file for these
 
 interface ApiResponse<T> {
@@ -62,4 +63,14 @@ export const transactionService = {
     fetcher<ApiResponse<null>>(ENDPOINTS.transaction.remove(id), {
       method: "DELETE",
     }),
+
+  getStatements: (accountId: number, params: { from: string; to: string }) =>
+    fetcher<ApiResponse<Statement>>(
+      `${ENDPOINTS.transaction.statements(accountId)}?from=${params.from}&to=${
+        params.to
+      }`,
+      {
+        method: "GET",
+      }
+    ),
 };
