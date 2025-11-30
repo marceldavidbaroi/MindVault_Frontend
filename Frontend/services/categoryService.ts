@@ -6,17 +6,7 @@ import {
   CreateCategoryDto,
   FilterCategoriesDto,
 } from "@/types/Category.type"; // <-- create this types file
-
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-  meta?: {
-    total: number;
-    page: number;
-    limit: number;
-  };
-}
+import { ApiResponse } from "@/types/ApiResponse.type";
 
 export const categoryService = {
   /** GET all categories with optional filters */

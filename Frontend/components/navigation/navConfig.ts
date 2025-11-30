@@ -43,7 +43,7 @@ export const navConfig: NavItem[] = [
       },
       {
         title: "Savings Goal",
-        href: "/finance/savings-goal",
+        href: "/finance/savings-goals",
         description:
           "Set and monitor your personal or business savings targets.",
       },
