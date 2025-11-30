@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,15 @@ import { useAccountStore } from "@/store/accountStore";
 
 interface AccountInfoProps {
   account: any;
-  roles: any[];
+  roles?: any[];
   accountTypes: any[];
   currencies: any[];
   refreshAccount: () => void;
+  permissions: {
+    isOwner: boolean;
+    isOwnerOrAdmin: boolean;
+    canEdit: boolean;
+  };
 }
 
 const AccountInfo: React.FC<AccountInfoProps> = ({
@@ -36,6 +41,7 @@ const AccountInfo: React.FC<AccountInfoProps> = ({
   accountTypes,
   currencies,
   refreshAccount,
+  permissions,
 }) => {
   const accountStore = useAccountStore();
   const router = useRouter();
@@ -152,16 +158,19 @@ const AccountInfo: React.FC<AccountInfoProps> = ({
               </>
             )}
           </div>
+
           <div className="flex gap-2">
             {editingAccount ? (
               <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleSaveAccount}
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
+                {permissions.canEdit && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleSaveAccount}
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -172,24 +181,29 @@ const AccountInfo: React.FC<AccountInfoProps> = ({
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleEditAccount}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {permissions.canEdit && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleEditAccount}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+                {permissions.isOwner && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => setDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </>
             )}
           </div>
         </CardHeader>
+
         <CardContent className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground">Type</p>

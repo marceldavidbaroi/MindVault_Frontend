@@ -40,6 +40,10 @@ export const accountService = {
     fetcher<ApiResponse<AccessAccount[]>>(ENDPOINTS.accounts.access, {
       method: "GET",
     }),
+  getCurrentRole: (accountId: number) =>
+    fetcher<ApiResponse<any>>(ENDPOINTS.accounts.roles.currentRole(accountId), {
+      method: "GET",
+    }),
 
   /** GET single account by ID */
   getOne: (id: number) =>

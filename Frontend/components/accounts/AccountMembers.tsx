@@ -25,12 +25,18 @@ interface AccountMembersProps {
   account: any;
   roles: any[];
   refreshAccount: () => void;
+  permissions: {
+    isOwner: boolean;
+    isOwnerOrAdmin: boolean;
+    canEdit: boolean;
+  };
 }
 
 const AccountMembers: React.FC<AccountMembersProps> = ({
   account,
   roles,
   refreshAccount,
+  permissions,
 }) => {
   const accountStore = useAccountStore();
 
@@ -40,10 +46,11 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
     open: boolean;
     userId: number | null;
   }>({ open: false, userId: null });
-
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [newUsername, setNewUsername] = useState<string>("");
   const [newRoleId, setNewRoleId] = useState<number | null>(null);
+
+  const canManageMembers = permissions.isOwnerOrAdmin;
 
   /** Role editing */
   const handleEditRole = (userId: number, currentRoleId: number) => {
@@ -84,7 +91,7 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
     if (!newUsername || !newRoleId) return;
 
     await accountStore.assignAccountRole(account.id, {
-      username: newUsername, // using username instead of userId
+      username: newUsername,
       roleId: newRoleId,
     });
 
@@ -99,10 +106,14 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
           <CardTitle className="text-lg font-semibold text-foreground">
             Account Members
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={handleAddMember}>
-            <Plus className="h-4 w-4 mr-1" /> Add Member
-          </Button>
+
+          {canManageMembers && (
+            <Button variant="outline" size="sm" onClick={handleAddMember}>
+              <Plus className="h-4 w-4 mr-1" /> Add Member
+            </Button>
+          )}
         </CardHeader>
+
         <CardContent>
           {account.users?.length === 0 ? (
             <p className="text-muted-foreground text-sm">
@@ -142,20 +153,24 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
                             ))}
                           </SelectContent>
                         </Select>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => handleSaveRole(u.id)}
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={handleCancelEditRole}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        {canManageMembers && (
+                          <>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => handleSaveRole(u.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={handleCancelEditRole}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     ) : (
                       <>
@@ -167,6 +182,7 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
                             {u.role.description}
                           </p>
                         </div>
+
                         <div className="flex gap-2">
                           <Button
                             variant="outline"

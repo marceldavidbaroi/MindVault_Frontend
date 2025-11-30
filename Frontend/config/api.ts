@@ -86,6 +86,7 @@ export const ENDPOINTS = {
       all: "/finance/accounts/types/all",
     },
     roles: {
+      currentRole: (id: number | string) => `/finance/accounts/${id}/role`,
       assign: (id: number | string) => `/finance/accounts/${id}/roles`,
       list: (id: number | string) => `/finance/accounts/${id}/roles`,
       update: (id: number | string, userId: number | string) =>
