@@ -7,14 +7,17 @@ import {
   getPasskeyDto,
   resetPasswordPasskeyDto,
   UpdateProfileDto,
+  User,
   UserState,
   VerifyAnswerDto,
 } from "@/types/User.type";
 import { userService } from "@/services/userService";
+import { ApiResponse } from "@/types/ApiResponse.type";
 
 export const useUserStore = create<UserState>((set, get) => ({
   // ---------------- USER ----------------
   user: undefined,
+  initialized: false, // ✅ track if profile is already loaded
   setUser: (user) => set({ user }),
 
   // ---------------- PASSKEY ----------------
@@ -26,14 +29,27 @@ export const useUserStore = create<UserState>((set, get) => ({
   setSecurityQuestions: (questions) => set({ securityQuestions: questions }),
 
   // ---------------- PROFILE ----------------
-  getProfile: async () => {
-    const res = await userService.get();
-    if (res.success) {
-      set({ user: res.data });
-    } else {
-      throw new Error(res.message || "Failed to fetch profile");
+  getProfile: async (): Promise<ApiResponse<User>> => {
+    try {
+      const res = await userService.get();
+      if (res.success) {
+        set({ user: res.data });
+
+        return { success: true, data: res.data, message: "" }; // always include message
+      } else {
+        return {
+          success: false,
+          data: undefined,
+          message: res.message || "Failed to fetch profile",
+        };
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        data: undefined,
+        message: error?.message || "Failed to fetch profile",
+      };
     }
-    return res;
   },
 
   updateProfile: async (data: UpdateProfileDto) => {
@@ -114,6 +130,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     const res = await userService.getQuestions(query);
     return res;
   },
+
   verifyAnswer: async (data: VerifyAnswerDto) => {
     const res = await userService.answerVerify(data);
     return res;

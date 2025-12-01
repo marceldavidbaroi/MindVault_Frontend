@@ -4,6 +4,7 @@ export const API_BASE_URL =
 export const ENDPOINTS = {
   auth: {
     signin: "/auth/signin",
+    signup: "/auth/signup",
     logout: "/auth/logout",
     me: "/auth/me",
     getPasskey: "/auth/passkey",
@@ -15,23 +16,84 @@ export const ENDPOINTS = {
       `/auth/forgot-password/${username}/verify`,
   },
   summary: {
-    transactionDashboard: "/summary/transaction-dashboard",
+    // Combined summaries
+    dashboard_comparison: (accountId: number | string) =>
+      `/summaries/${accountId}/comparison`,
+    dailyCategorySummary: (accountId: number) =>
+      `/category-summaries/${accountId}/daily`,
+    monthlyCategorySummary: (accountId: number) =>
+      `/category-summaries/${accountId}/monthly`,
+    dailySummary: {
+      get: (accountId: number) => `/daily-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/daily-summaries/${accountId}/comparison`,
+      lastNDays: (accountId: number) =>
+        `/daily-summaries/${accountId}/last-n-days`,
+    },
+    weeklySummary: {
+      get: (accountId: number) => `/weekly-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/weekly-summaries/${accountId}/comparison`,
+      lastNWeeks: (accountId: number) =>
+        `/weekly-summaries/${accountId}/last-n-weeks`,
+    },
+    monthlySummary: {
+      get: (accountId: number) => `/monthly-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/monthly-summaries/${accountId}/comparison`,
+      lastNMonths: (accountId: number) =>
+        `/monthly-summaries/${accountId}/last-n-months`,
+    },
+    yearlySummary: {
+      get: (accountId: number) => `/yearly-summaries/${accountId}`,
+      comparison: (accountId: number) =>
+        `/yearly-summaries/${accountId}/comparison`,
+      lastNYears: (accountId: number) =>
+        `/yearly-summaries/${accountId}/last-n-years`,
+    },
+    trendInsights: {
+      trend: (accountId: number) => `/trend-insights/${accountId}/trend`,
+      topCategories: (accountId: number) =>
+        `/trend-insights/${accountId}/top-categories`,
+    },
   },
   transaction: {
-    all: "/transactions", // GET all transactions with filters & pagination
-    getOne: (id: number | string) => `/transactions/${id}`, // GET single transaction
-    create: "/transactions", // POST create transaction
-    createBulk: "/transactions/bulk", // POST bulk create
-    update: (id: number | string) => `/transactions/${id}`, // PATCH update
-    remove: (id: number | string) => `/transactions/${id}`, // DELETE transaction
+    getAll: (accountId: number) => `/transactions/${accountId}/transactions`,
+    getOne: (id: number | string) => `/transactions/${id}`,
+    create: "/transactions",
+    createBulk: "/transactions/bulk",
+    update: (id: number | string) => `/transactions/${id}`,
+    remove: (id: number | string) => `/transactions/${id}`,
+    statements: (accountId: number | string) =>
+      `/transactions/${accountId}/statement`,
   },
   category: {
-    all: "/categories", // GET all categories (with optional filters)
-    getOne: (id: number | string) => `/categories/${id}`, // GET single category
-    create: "/categories", // POST create category
-    update: (id: number | string) => `/categories/${id}`, // PATCH update category
-    remove: (id: number | string) => `/categories/${id}`, // DELETE category
-    stats: "/categories/stats/all", // GET category stats
+    all: "/finance/categories",
+    getOne: (id: number | string) => `/finance/categories/${id}`,
+    create: "/finance/categories",
+    update: (id: number | string) => `/finance/categories/${id}`,
+    remove: (id: number | string) => `/finance/categories/${id}`,
+    stats: "/finance/categories/stats/all",
+  },
+  accounts: {
+    create: "/finance/accounts",
+    my: "/finance/accounts/my",
+    access: "/finance/accounts/access",
+    update: (id: number | string) => `/finance/accounts/${id}`,
+    remove: (id: number | string) => `/finance/accounts/${id}`,
+    getOne: (id: number | string) => `/finance/accounts/${id}`,
+    types: {
+      all: "/finance/accounts/types/all",
+    },
+    roles: {
+      currentRole: (id: number | string) => `/finance/accounts/${id}/role`,
+      assign: (id: number | string) => `/finance/accounts/${id}/roles`,
+      list: (id: number | string) => `/finance/accounts/${id}/roles`,
+      update: (id: number | string, userId: number | string) =>
+        `/finance/accounts/${id}/roles/${userId}`,
+      remove: (id: number | string, userId: number | string) =>
+        `/finance/accounts/${id}/roles/${userId}`,
+    },
   },
   user: {
     profile: "/profile",
@@ -43,5 +105,20 @@ export const ENDPOINTS = {
     create: "/security-questions",
     update: (id: number | string) => `/security-questions/${id}`,
     delete: (id: number | string) => `/security-questions/${id}`,
+  },
+  currency: {
+    get: "/finance/currencies",
+  },
+  roles: {
+    getAll: "/roles",
+    getOne: (id: number | string) => `/roles/${id}`,
+  },
+
+  savingsGoals: {
+    create: "/finance/savings-goals",
+    my: "/finance/savings-goals/my",
+    getOne: (id: number | string) => `/finance/savings-goals/${id}`,
+    update: (id: number | string) => `/finance/savings-goals/${id}`,
+    remove: (id: number | string) => `/finance/savings-goals/${id}`,
   },
 };

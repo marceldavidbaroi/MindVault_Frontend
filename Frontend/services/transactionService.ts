@@ -2,9 +2,10 @@ import { fetcher } from "@/lib/fetcher";
 import { ENDPOINTS } from "@/config/api";
 import {
   CreateTransactionDto,
-  BulkTransactionDto,
   FindTransactionsDto,
   Transaction,
+  BulkCreateTransaction,
+  Statement,
 } from "@/types/Transaction.type"; // <-- make a types file for these
 
 interface ApiResponse<T> {
@@ -14,18 +15,18 @@ interface ApiResponse<T> {
   meta?: {
     total: number;
     page: number;
-    limit: number;
+    pageSize: number;
   };
 }
 
 export const transactionService = {
   /** GET all transactions with optional query params */
-  getAll: (query?: FindTransactionsDto) => {
+  getAll: (accountId: number, query?: FindTransactionsDto) => {
     const params = query
       ? "?" + new URLSearchParams(query as any).toString()
       : "";
-    return fetcher<ApiResponse<Transaction[]>>(
-      `${ENDPOINTS.transaction.all}${params}`,
+    return fetcher<ApiResponse<any>>(
+      `${ENDPOINTS.transaction.getAll(accountId)}${params}`,
       { method: "GET" }
     );
   },
@@ -44,7 +45,7 @@ export const transactionService = {
     }),
 
   /** BULK CREATE transactions */
-  createBulk: (data: BulkTransactionDto) =>
+  createBulk: (data: BulkCreateTransaction) =>
     fetcher<ApiResponse<Transaction[]>>(ENDPOINTS.transaction.createBulk, {
       method: "POST",
       body: JSON.stringify(data),
@@ -53,7 +54,7 @@ export const transactionService = {
   /** UPDATE transaction by ID */
   update: (id: number, data: Partial<CreateTransactionDto>) =>
     fetcher<ApiResponse<Transaction>>(ENDPOINTS.transaction.update(id), {
-      method: "PATCH",
+      method: "PUT",
       body: JSON.stringify(data),
     }),
 
@@ -62,4 +63,14 @@ export const transactionService = {
     fetcher<ApiResponse<null>>(ENDPOINTS.transaction.remove(id), {
       method: "DELETE",
     }),
+
+  getStatements: (accountId: number, params: { from: string; to: string }) =>
+    fetcher<ApiResponse<Statement>>(
+      `${ENDPOINTS.transaction.statements(accountId)}?from=${params.from}&to=${
+        params.to
+      }`,
+      {
+        method: "GET",
+      }
+    ),
 };

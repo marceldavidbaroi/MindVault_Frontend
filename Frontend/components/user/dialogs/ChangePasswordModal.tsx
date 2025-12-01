@@ -54,10 +54,6 @@ const ChangePasswordModal = ({ open, onClose }: ChangePasswordModalProps) => {
       return;
     }
 
-    console.log({
-      oldPassword,
-      newPassword,
-    });
     const payload = {
       oldPassword: oldPassword,
       newPassword: newPassword,

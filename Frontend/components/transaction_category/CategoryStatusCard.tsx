@@ -21,64 +21,92 @@ interface SummaryData {
 const CategoryStatusCard = ({ data }: { data: SummaryData }) => {
   return (
     <div
+      // CRITICAL: Ensure cards remain in a row and enable horizontal scrolling
       className="
-        flex flex-col gap-4
-        sm:flex-row sm:flex-wrap sm:justify-between
-        lg:flex-col
+        flex flex-row 
+        justify-start 
+        w-full 
+        gap-3 
+        overflow-x-auto 
+        pb-2  /* Adds padding to prevent scrollbar from hiding content */
       "
     >
-      {/* Total */}
-      <Card className="bg-card text-card-foreground border border-border shadow hover:shadow-md transition-all flex-1 min-w-[220px]">
-        <CardHeader className="flex items-center justify-between pb-2">
-          <CardTitle className="text-base font-semibold text-primary flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-primary" />
-            Total Transaction Categories
+      {/* 1. Total Card - Densified */}
+      <Card className="bg-card text-card-foreground border border-border shadow hover:shadow-md transition-all flex-1 min-w-[180px]">
+        {/* Adjusted Header: Smaller padding and grouped title/icon */}
+        <CardHeader className="p-3 flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+            <Wallet className="h-4 w-4 text-foreground/70" />
+            Total Categories
           </CardTitle>
-          <span className="text-xl font-bold">{data.total}</span>
+          {/* Use text-foreground for the main total count */}
+          <span className="text-2xl font-bold text-foreground">
+            {data.total}
+          </span>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Combined income & expense activity
+        {/* Removed CardContent completely to save maximum vertical space */}
+      </Card>
+
+      {/* 2. Income Card - Densified (Themed using primary) */}
+      <Card className="bg-primary/10 text-primary border border-primary/30 shadow hover:shadow-md transition-all flex-1 min-w-[180px]">
+        <CardHeader className="p-3 flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+            {/* Using text-primary for the icon color */}
+            <ArrowUp className="h-4 w-4 text-primary" />
+            Income Categories
+          </CardTitle>
+          {/* Changed hardcoded green to text-primary */}
+          <span className="text-2xl font-bold text-primary">
+            {data.income.total}
+          </span>
+        </CardHeader>
+        {/* Condensed Content: Using smaller text and tight padding */}
+        <CardContent className="p-3 pt-0 text-xs text-muted-foreground space-y-0">
+          <div className="flex justify-between">
+            <span>System</span>
+            {/* Using text-primary for counts */}
+            <span className="font-semibold text-primary">
+              {data.income.system}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>User Defined</span>
+            {/* Using text-primary for counts */}
+            <span className="font-semibold text-primary">
+              {data.income.user}
+            </span>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Income */}
-      <Card className="bg-primary/10 text-primary border border-primary/30 shadow hover:shadow-md transition-all flex-1 min-w-[220px]">
-        <CardHeader className="flex items-center justify-between pb-2">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <ArrowUp className="h-5 w-5" />
-            Income
+      {/* 3. Expense Card - Densified (Themed using destructive) */}
+      <Card className="bg-destructive/10 text-destructive border border-destructive/30 shadow hover:shadow-md transition-all flex-1 min-w-[180px]">
+        <CardHeader className="p-3 flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+            {/* Using text-destructive for the icon color */}
+            <ArrowDown className="h-4 w-4 text-destructive" />
+            Expense Categories
           </CardTitle>
-          <span className="text-xl font-bold">{data.income.total}</span>
+          {/* Using text-destructive for the total count */}
+          <span className="text-2xl font-bold text-destructive">
+            {data.expense.total}
+          </span>
         </CardHeader>
-        <CardContent className="text-sm space-y-1">
+        {/* Condensed Content: Using smaller text and tight padding */}
+        <CardContent className="p-3 pt-0 text-xs text-muted-foreground space-y-0">
           <div className="flex justify-between">
             <span>System</span>
-            <span className="font-medium">{data.income.system}</span>
+            {/* Using text-destructive for counts */}
+            <span className="font-semibold text-destructive">
+              {data.expense.system}
+            </span>
           </div>
           <div className="flex justify-between">
-            <span>User</span>
-            <span className="font-medium">{data.income.user}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Expense */}
-      <Card className="bg-destructive/10 text-destructive border border-destructive/30 shadow hover:shadow-md transition-all flex-1 min-w-[220px]">
-        <CardHeader className="flex items-center justify-between pb-2">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <ArrowDown className="h-5 w-5" />
-            Expense
-          </CardTitle>
-          <span className="text-xl font-bold">{data.expense.total}</span>
-        </CardHeader>
-        <CardContent className="text-sm space-y-1">
-          <div className="flex justify-between">
-            <span>System</span>
-            <span className="font-medium">{data.expense.system}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>User</span>
-            <span className="font-medium">{data.expense.user}</span>
+            <span>User Defined</span>
+            {/* Using text-destructive for counts */}
+            <span className="font-semibold text-destructive">
+              {data.expense.user}
+            </span>
           </div>
         </CardContent>
       </Card>

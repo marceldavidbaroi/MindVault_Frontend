@@ -1,32 +1,18 @@
-import TransactionExplorerIndex from "@/components/transaction/TransactionExplorerIndex";
-import { ENDPOINTS } from "@/config/api";
-import { fetcher } from "@/lib/fetcher";
-import { ApiResponse } from "@/types/ApiResponse.type";
-import { Category } from "@/types/Category.type";
-import { cookies } from "next/headers";
-import React from "react";
+"use client";
+import AccountsList from "@/components/transaction/AccountList";
+import { useAccountStore } from "@/store/accountStore";
+import React, { useEffect } from "react";
 
-const TransactionExplorerPage = async () => {
-  const cookieStore = await cookies();
-
-  // ✅ Construct cookie header
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
-  const categories: ApiResponse<Category[]> = await fetcher(
-    ENDPOINTS.category.all,
-    {
-      method: "GET",
-      headers: {
-        cookie: cookieHeader,
-      },
-      cache: "no-store",
-    }
-  );
+const TransactionExplorerPage = () => {
+  const accountStore = useAccountStore();
+  useEffect(() => {
+    accountStore.getAccountsWithAccess();
+  }, []);
   return (
     <>
-      <TransactionExplorerIndex categories={categories.data} />
+      <div className="max-w-[250px]">
+        <AccountsList redirectBase="/finance/transaction-explorer" />
+      </div>
     </>
   );
 };

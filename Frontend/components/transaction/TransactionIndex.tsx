@@ -1,126 +1,181 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import FinancialSummaryCard from "@/components/transaction/FinancialSummaryCard";
-import TransactionTableMini from "@/components/transaction/TransactionTableMini";
-import WeeklySpendingCard from "@/components/transaction/WeeklySpendingCard";
-import FinancialSummaryCardSkeleton from "./skeleton/FinancialSummaryCardSkeleton";
-import WeeklySpendingCardSkeleton from "./skeleton/WeeklySpendingCardSkeleton";
-import TransactionTableMiniSkeleton from "./skeleton/TransactionTableMiniSkeleton";
-import { useSummaryStore } from "@/store/summaryStore";
-import TransactionList from "./TransactionList";
+import React, { useEffect, useRef, useState } from "react";
+import AccountsList from "./AccountList";
+import { useAccountStore } from "@/store/accountStore";
+import { Button } from "@/components/ui/button";
+import { Plus, Layers, Compass } from "lucide-react";
 import { useCategoryStore } from "@/store/categoryStore";
-import { TransactionSummaryDashboard } from "@/types/Summary.type";
-import { Category } from "@/types/Category.type";
+import { useCurrencyStore } from "@/store/currencyStore";
+import { TransactionDialog } from "./TransactionFormModal";
+import { CreateTransactionDto } from "@/types/Transaction.type";
+import DashboardSummaryRow from "./DashboardSummaryRow";
+import { useSummaryStore } from "@/store/summaryStore";
+import CompactTransactionList from "./CompactTransactionList";
+import CategorySummaryChart from "./CategorySummaryBarChart";
+import CategorySummaryChartSkeleton from "./skeleton/Category Summary Bar ChartSkeleton";
+import CompactTransactionListSkeleton from "./skeleton/CompactTransactionListSkeleton";
+import DashboardSummaryRowSkeleton from "./skeleton/DashboardSummaryRowSkeleton";
+import AccountsListSkeleton from "./skeleton/AccountsListSkeleton";
+import { BulkTransactionDialog } from "./BulkTransactionFormModal";
+import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
+import { useRouter } from "next/navigation";
+
 interface TransactionIndexProps {
-  data: TransactionSummaryDashboard;
-  categoriesData: Category[];
+  selectedAccountId: string | number | null;
 }
+
 const TransactionIndex: React.FC<TransactionIndexProps> = ({
-  data,
-  categoriesData,
+  selectedAccountId,
 }) => {
-  const { transactionsDashboard, setTransactionDashboard } = useSummaryStore();
-  const { categories, setCategories } = useCategoryStore();
-  const [showList, setShowList] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const accountStore = useAccountStore();
+  const categoryStore = useCategoryStore();
+  const currencyStore = useCurrencyStore();
+  const summaryStore = useSummaryStore();
+  const router = useRouter();
+
+  const { refreshAll } = useTransactionRefresh();
+
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [editData, setEditData] = useState<CreateTransactionDto | undefined>();
 
   useEffect(() => {
-    if (data) setLoading(false);
-  }, [data]);
+    accountStore.setSelectedAccountId(selectedAccountId);
+  }, [selectedAccountId]);
+
+  const prevAccountIdRef = useRef<any>(null);
 
   useEffect(() => {
-    setTransactionDashboard(data);
-    console.log("data", data);
-  }, [data, setTransactionDashboard]);
+    const loadData = async () => {
+      try {
+        const currentId = accountStore.selectedAccountId;
 
-  useEffect(() => {
-    setCategories(categoriesData);
-    console.log("category data", categoriesData);
-  }, [categoriesData, setCategories]);
+        // Only proceed if the account ID really changed
+        if (!currentId || prevAccountIdRef.current === currentId) return;
 
-  useEffect(() => {
-    console.log("Updated store:", transactionsDashboard);
-  }, [transactionsDashboard]);
-  useEffect(() => {
-    console.log("Updated store:for categories", categoriesData);
-  }, [categoriesData]);
+        prevAccountIdRef.current = currentId; // update ref
+
+        setInitialLoading(true);
+
+        await Promise.all([
+          accountStore.getAccountsWithAccess(),
+          categoryStore.getAllCategories(),
+          currencyStore.getAllCurrencies(),
+        ]);
+
+        await refreshAll(Number(currentId));
+      } catch {
+        console.log("some error occurred");
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    loadData();
+  }, [accountStore.selectedAccountId]);
+
+  const handleAddTransaction = () => {
+    setEditData(undefined);
+    setDialogOpen(true);
+  };
 
   return (
-    <div className="min-h-[70vh] p-4 bg-background text-foreground transition-colors duration-300">
-      {/* Summary + Table Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {/* LEFT SIDE */}
-        <div className="col-span-1 md:col-span-3 flex flex-col gap-4">
-          {/* Top row: Summary Cards */}
-          <div
-            className="
-              flex overflow-x-auto px-2 py-2 gap-4 snap-x snap-mandatory
-              scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent
-              scrollbar-thumb-rounded-full
-              hover:scrollbar-thumb-muted/80
-              transition-colors duration-200
-              [&::-webkit-scrollbar]:h-2
-              [&::-webkit-scrollbar-track]:bg-muted/20
-              [&::-webkit-scrollbar-thumb]:bg-muted
-              [&::-webkit-scrollbar-thumb]:rounded-full
-              [&::-webkit-scrollbar-thumb:hover]:bg-muted/80
-            "
-          >
-            {transactionsDashboard.summary.length === 0
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 snap-start min-w-[250px]"
-                  >
-                    <FinancialSummaryCardSkeleton />
-                  </div>
-                ))
-              : transactionsDashboard.summary.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 snap-start min-w-[250px]"
-                  >
-                    <FinancialSummaryCard data={item} />
-                  </div>
-                ))}
-          </div>
-
-          {/* Bottom: Transaction Table */}
-          <div className="flex-1 overflow-auto  rounded-xl shadow-sm ">
-            {loading ? (
-              <TransactionTableMiniSkeleton />
-            ) : (
-              <TransactionTableMini
-                data={transactionsDashboard.recentTransactions}
-                onInfoClick={() => setShowList(!showList)}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
-          {loading ? (
-            <WeeklySpendingCardSkeleton />
-          ) : (
-            <WeeklySpendingCard
-              totalRemainingIncomeAllTime={
-                transactionsDashboard.totalRemainingIncomeAllTime
-              }
-              totalRemainingIncomeThisMonth={
-                transactionsDashboard.totalRemainingIncomeThisMonth
-              }
-              weekly={transactionsDashboard.weekly}
-            />
-          )}
-        </div>
+    <div className="h-full grid grid-cols-12 gap-3 p-3">
+      {/* LEFT SIDEBAR */}
+      <div className="col-span-2 h-full rounded-xl flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-primary/50 scrollbar-track-transparent">
+        {initialLoading ? <AccountsListSkeleton /> : <AccountsList />}
       </div>
-      {showList && (
-        <div className="mt-6">
-          <TransactionList />
-        </div>
-      )}
+
+      {/* RIGHT SIDE */}
+      <div className="col-span-10">
+        {!initialLoading && !accountStore.selectedAccount ? (
+          // 🔴 ACCOUNT NOT FOUND
+          <div className="h-full flex items-center justify-center p-10">
+            <div className="text-center space-y-3">
+              <p className="text-lg font-semibold text-red-500">
+                Account not found or you do not have access to this account.
+              </p>
+              <p className="text-muted-foreground">
+                Please select a different account from the menu.
+              </p>
+            </div>
+          </div>
+        ) : (
+          // ✅ ACCOUNT FOUND - SHOW DASHBOARD
+          <div className="grid grid-rows-[5%_25%_70%] gap-3 h-full">
+            {/* BUTTONS */}
+            <div className="flex justify-end gap-1">
+              <Button
+                className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
+                onClick={handleAddTransaction}
+              >
+                <Plus size={16} />
+              </Button>
+              <Button
+                className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
+                onClick={() => setBulkDialogOpen(true)}
+              >
+                <Layers size={16} />
+              </Button>
+              <Button
+                className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
+                onClick={() => {
+                  if (accountStore.selectedAccountId) {
+                    router.push(
+                      `/finance/transaction-explorer/${accountStore.selectedAccountId}`
+                    );
+                  }
+                }}
+              >
+                <Compass size={16} className="cursor-pointer" />{" "}
+              </Button>
+            </div>
+
+            {/* TOP SECTION */}
+            <div className="rounded-xl backdrop-blur-md overflow-x-auto">
+              <div className="flex gap-4 min-w-max">
+                {initialLoading ? (
+                  <DashboardSummaryRowSkeleton />
+                ) : (
+                  <DashboardSummaryRow />
+                )}
+              </div>
+            </div>
+
+            {/* BOTTOM SECTION */}
+            <div className="grid grid-cols-10 gap-3">
+              <div className="col-span-10 md:col-span-5 rounded-xl backdrop-blur-md">
+                {initialLoading ? (
+                  <CompactTransactionListSkeleton />
+                ) : (
+                  <CompactTransactionList />
+                )}
+              </div>
+
+              <div className="col-span-10 md:col-span-5 rounded-xl backdrop-blur-md">
+                {initialLoading ? (
+                  <CategorySummaryChartSkeleton />
+                ) : (
+                  <CategorySummaryChart />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <TransactionDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        initialData={editData}
+      />
+
+      <BulkTransactionDialog
+        open={bulkDialogOpen}
+        onClose={() => setBulkDialogOpen(false)}
+      />
     </div>
   );
 };

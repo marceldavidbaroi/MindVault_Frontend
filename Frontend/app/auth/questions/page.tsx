@@ -30,7 +30,6 @@ const SecurityQuestion = () => {
 
   const handleUsernameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Username entered:", username);
 
     const res = await userStore.forgetPassQuestions(username);
     if (res?.data?.length) {
@@ -81,8 +80,6 @@ const SecurityQuestion = () => {
       })),
       newPassword,
     };
-
-    console.log("Payload:", payload);
   };
 
   return (

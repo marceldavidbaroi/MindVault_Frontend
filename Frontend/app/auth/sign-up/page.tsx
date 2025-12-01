@@ -14,8 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuthStore } from "@/store/authStore";
 
 export default function SignUpPage() {
+  const authStore = useAuthStore();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,7 @@ export default function SignUpPage() {
     confirmPassword?: string;
   }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
 
@@ -41,8 +43,9 @@ export default function SignUpPage() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log({ username, password });
       // TODO: Call your API here
+      await authStore.signup(username, password);
+      router.push("/auth/sign-in");
     }
   };
 

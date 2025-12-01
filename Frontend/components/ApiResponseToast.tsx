@@ -10,7 +10,6 @@ export const ApiResponseToast = () => {
 
   useEffect(() => {
     if (!response) return;
-    console.log(response);
 
     if (response.success) {
       toast.success(response.message || "Success");
@@ -24,7 +23,7 @@ export const ApiResponseToast = () => {
 
   return (
     <Toaster
-      position="top-center"
+      position="bottom-left"
       richColors
       closeButton
       expand

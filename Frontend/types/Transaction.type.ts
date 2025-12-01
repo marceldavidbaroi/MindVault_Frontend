@@ -13,27 +13,56 @@ export interface TransactionCategory {
 
 export interface Transaction {
   id: number;
-  type: TransactionType;
-  category: TransactionCategory;
+  type: "income" | "expense";
   amount: string;
-  date: string;
-  description?: string;
+  transactionDate: string; // YYYY-MM-DD
+  description: string | null;
+  status: "pending" | "cleared" | "void" | "failed";
   recurring: boolean;
-  recurringInterval?: RecurringInterval | null;
-  createdAt: string;
-  updatedAt: string;
+  recurringInterval: "daily" | "weekly" | "monthly" | "yearly";
+  externalRefId: string | null;
+  createdAt: string; // ISO date
+  updatedAt: string; // ISO date
+  account: {
+    id: number;
+    name: string;
+  };
+  category: {
+    id: number;
+    name: string;
+  };
+  currency: {
+    symbol: string;
+    code: string;
+  };
+  creatorUser: {
+    id: number;
+    username: string;
+  };
 }
+
+// export interface PaginatedTransactions {
+//   items: Transaction[];
+//   total: number;
+//   page: number;
+//   pageSize: number;
+// }
 
 /** DTOs for API requests */
 
 export interface CreateTransactionDto {
-  type: TransactionType;
-  categoryId: number;
-  amount: number;
-  date: string; // ISO string YYYY-MM-DD
+  id?: number;
+  accountId: number | string | null;
+  categoryId?: number;
+  type: "income" | "expense";
+  amount: string;
+  currencyCode?: string;
+  transactionDate: string; // YYYY-MM-DD
   description?: string;
+  status?: "pending" | "cleared" | "void" | "failed";
+  externalRefId?: string;
   recurring?: boolean;
-  recurringInterval?: RecurringInterval;
+  recurringInterval?: "daily" | "weekly" | "monthly" | "yearly";
 }
 
 export interface TransactionItemDto {
@@ -41,19 +70,55 @@ export interface TransactionItemDto {
   amount: number | undefined;
 }
 
-export interface BulkTransactionDto {
-  date: string; // ISO string
-  type: TransactionType;
-  transactions: TransactionItemDto[];
+export interface BulkTransactionItem {
+  /** Transaction amount as string to preserve precision */
+  amount: string;
+  /** Optional category ID */
+  categoryId?: number;
+  /** Optional transaction date YYYY-MM-DD */
+  transactionDate?: string;
+  /** Optional external reference ID */
+  externalRefId?: string;
+}
+
+export interface BulkCreateTransaction {
+  /** Account ID for all transactions */
+  accountId: number;
+  /** Transaction type for all transactions (income/expense) */
+  type?: "income" | "expense";
+  /** Currency code */
+  currencyCode?: string;
+  /** Description for all transactions */
+  description?: string;
+  /** Status for all transactions */
+  status?: "pending" | "completed" | "failed";
+  /** Recurring flag */
+  recurring?: boolean;
+  /** Recurring interval for all transactions */
+  recurringInterval?: "daily" | "weekly" | "monthly" | "yearly";
+  /** List of individual transactions */
+  transactions: BulkTransactionItem[];
 }
 
 export interface FindTransactionsDto {
-  type?: TransactionType;
   categoryId?: number;
-  startDate?: string;
-  endDate?: string;
+  type?: TransactionType;
+  status?: "pending" | "cleared" | "void" | "failed";
+  creatorUserId?: number;
+  from?: string; // YYYY-MM-DD
+  to?: string; // YYYY-MM-DD
   page?: number;
-  limit?: number;
+  pageSize?: number;
+  sortBy?:
+    | "transactionDate"
+    | "amount"
+    | "type"
+    | "status"
+    | "externalRefId"
+    | "id"
+    | "createdAt"
+    | "updatedAt";
+  sortOrder?: "ASC" | "DESC";
 }
 
 export interface SummaryData {
@@ -68,7 +133,7 @@ export interface SummaryData {
 export interface TransactionMeta {
   total: number;
   page: number;
-  limit: number;
+  pageSize: number;
 }
 
 /** Generic API response */
@@ -77,4 +142,27 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
   meta?: TransactionMeta;
+}
+export interface Statement {
+  openingBalance: string;
+  transactions: StatementTransaction[];
+  closingBalance: string;
+}
+
+export interface StatementTransaction {
+  id: number;
+  category: {
+    id: number;
+    name: string;
+  };
+  type: "income" | "expense";
+  amount: number;
+  currency: {
+    code: string;
+    symbol: string;
+  };
+  transactionDate: string;
+  description: string | null;
+  status: "pending" | "cleared" | string; // extend if needed
+  runningBalance: string;
 }

@@ -73,13 +73,6 @@ const SecurityQuestionsSection: React.FC<Props> = ({ data }) => {
   const handleSave = () => {
     if (!isValid) return;
 
-    console.log({
-      id: editingQuestion?.id || null,
-      question: questionValue,
-      answer: answerValue,
-      password,
-    });
-
     if (editingQuestion) {
       userStore.updateSecurityQuestion(editingQuestion.id, {
         question: questionValue,
@@ -105,8 +98,6 @@ const SecurityQuestionsSection: React.FC<Props> = ({ data }) => {
 
   const handleDeleteConfirm = async () => {
     if (!deletePassword) return;
-
-    console.log("Delete question ID:", deleteId, "Password:", deletePassword);
 
     if (deleteId) {
       // wrap in DTO object as required

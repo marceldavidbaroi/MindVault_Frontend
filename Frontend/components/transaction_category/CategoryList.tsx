@@ -41,6 +41,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories }) => {
     >
       <span className="font-medium text-foreground">{cat.displayName}</span>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        {/* {JSON.stringify(cat)} */}
         {cat.user ? (
           <>
             <User className="w-4 h-4" /> User
@@ -59,8 +60,10 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories }) => {
     categories: Category[],
     type: "income" | "expense"
   ) => (
-    <Card className="flex-1 border border-border shadow-md bg-card h-full">
-      <CardHeader className="flex items-center justify-between">
+    // Set Card as the main vertical flex container, consuming full available height
+    <Card className="flex-1 border border-border shadow-md bg-card h-full flex flex-col">
+      {/* CardHeader: Fixed height at the top, visually separated */}
+      <CardHeader className="flex items-center justify-between p-4 border-b border-border/70">
         <div className="flex items-center gap-2">
           {type === "income" ? (
             <ArrowUp className="w-5 h-5 text-primary" />
@@ -89,8 +92,11 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories }) => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-0 h-full">
-        <ScrollArea className="max-h-full w-full">
+
+      {/* CardContent: Takes up the remaining flexible height, min-h-0 is essential in flex layouts */}
+      <CardContent className="p-0 flex-1 min-h-0">
+        {/* ScrollArea: Set to h-full to fill the flexible space, enabling independent scrolling */}
+        <ScrollArea className="h-full w-full">
           <ul className="flex flex-col gap-1 p-2">
             {categories.map(renderCategoryItem)}
           </ul>
@@ -103,7 +109,8 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories }) => {
   const expenseCategories = categories.filter((cat) => cat.type === "expense");
 
   return (
-    <ScrollArea className="w-full h-full">
+    // Removed outer ScrollArea, allowing the content to fill the parent container height
+    <div className="w-full h-full">
       <div className="flex flex-col lg:flex-row gap-4 w-full h-full">
         {renderCard("Income", incomeCategories, "income")}
         {renderCard("Expense", expenseCategories, "expense")}
@@ -125,7 +132,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories }) => {
         onClose={closeCreateDialog}
         mode="create"
       />
-    </ScrollArea>
+    </div>
   );
 };
 

@@ -7,6 +7,11 @@ export const authService = {
       method: "POST",
       body: JSON.stringify({ username, password }),
     }),
+  signup: (username: string, password: string) =>
+    fetcher<any>(ENDPOINTS.auth.signup, {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+    }),
   logout: () => {
     fetcher<any>(ENDPOINTS.auth.logout, {
       method: "POST",

@@ -1,217 +1,148 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { useCategoryStore } from "@/store/categoryStore";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/ui/date-picker";
-import { format } from "date-fns";
+import { useAccountStore } from "@/store/accountStore";
 import { useTransactionStore } from "@/store/transactionStore";
-import { FindTransactionsDto, TransactionType } from "@/types/Transaction.type";
+import {
+  CreateTransactionDto,
+  FindTransactionsDto,
+} from "@/types/Transaction.type";
+import { format } from "date-fns";
+import React, { useEffect, useState } from "react";
 import TransactionExplorerList from "./TransactionExplorerList";
-import TransactionExplorerListSkeleton from "./skeleton/TransactionExplorerListSkeleton";
-import { PlusCircle, Layers } from "lucide-react";
+import TransactionExplorerFilter from "./TransactionExplorerFilter";
+import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
+import Pagination from "../common/Pagination";
 import { Button } from "../ui/button";
-import TransactionModal from "./TransactionModal";
-import BulkTransactionModal from "./BulkTransactionModal";
-import { Category } from "@/types/Category.type";
-import PaginationControl from "../common/PaginationControl";
-interface TransactionExplorerIndexProps {
-  categories: Category[];
-}
+import { Compass, Layers, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { TransactionDialog } from "./TransactionFormModal";
+import { BulkTransactionDialog } from "./BulkTransactionFormModal";
+import TransactionExplorerSkeleton from "./skeleton/TransactionExplorerIndexSkeleton";
 
-const TransactionExplorerIndex: React.FC<TransactionExplorerIndexProps> = ({
-  categories,
-}) => {
-  const categoryStore = useCategoryStore();
+const TransactionExplorerIndex = () => {
   const transactionStore = useTransactionStore();
+  const accountStore = useAccountStore();
+  const { refreshTransactions } = useTransactionRefresh();
+  const router = useRouter();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [editData, setEditData] = useState<CreateTransactionDto | undefined>();
+  const [loading, setLoading] = useState(true);
 
-  // State
-  const [type, setType] = useState<TransactionType | null>(null);
-  const [categoryId, setCategoryId] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [isBulkIncomeModalOpen, setIsBulkIncomeModalOpen] = useState(false);
-  const [isBulkExpenseModalOpen, setIsBulkExpenseModalOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Date>(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
-  });
-  const [endDate, setEndDate] = useState<Date>(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  });
-  const [currentPage, setCurrentPage] = useState(1);
+  const selectedAccountId = accountStore.selectedAccountId;
 
-  // Load categories
-  useEffect(() => {
-    categoryStore.setCategories(categories);
-  }, [categories]);
-
-  // Total pages from meta
-  const totalPages = transactionStore.meta
-    ? Math.ceil(transactionStore.meta.total / transactionStore.meta.limit)
-    : 1;
-
+  // -------------------------
   // Fetch transactions
-  const getAll = async (page = 1) => {
+  // -------------------------
+  const fetchTransactions = async (customFilters?: FindTransactionsDto) => {
+    if (!selectedAccountId) return;
+
     setLoading(true);
-    const query: FindTransactionsDto = {
-      startDate: format(startDate, "yyyy-MM-dd"),
-      endDate: format(endDate, "yyyy-MM-dd"),
-      page,
+
+    // Merge store filters with any custom ones
+    const filtersToUse: FindTransactionsDto = {
+      ...transactionStore.filters,
+      ...customFilters,
     };
-    if (type) query.type = type;
-    if (categoryId) query.categoryId = categoryId;
 
-    await transactionStore.getAllTransactions(query);
-    setLoading(false);
+    // Remove undefined or empty values
+    const query: FindTransactionsDto = {};
+    Object.entries(filtersToUse).forEach(([key, value]) => {
+      if (value !== undefined && value !== "") {
+        query[key as keyof FindTransactionsDto] = value;
+      }
+    });
+
+    // Update store filters
+    transactionStore.setFilters(query);
+
+    try {
+      await refreshTransactions(Number(selectedAccountId), query);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // -------------------------
+  // Init on account change
+  // -------------------------
   useEffect(() => {
-    getAll(currentPage);
-  }, [type, categoryId, startDate, endDate, currentPage]);
+    const todayStr = format(new Date(), "yyyy-MM-dd");
 
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
+    fetchTransactions({
+      page: 1,
+      pageSize: 25,
+      sortBy: "updatedAt",
+      sortOrder: "DESC",
+      to: todayStr,
+    });
+  }, [selectedAccountId]);
+
+  const handleAddTransaction = () => {
+    setEditData(undefined);
+    setDialogOpen(true);
   };
-
-  // Filter categories by type
-  const filteredCategories = !type
-    ? categoryStore.categories
-    : categoryStore.categories.filter((cat) => cat.type === type);
 
   return (
-    <div className="p-4 flex flex-col gap-6">
-      {/* Filter Section */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Type */}
-        <div className="flex flex-col gap-1">
-          <Label>Type</Label>
-          <Select
-            value={type || "all"}
-            onValueChange={(val) =>
-              setType(val === "all" ? null : (val as TransactionType))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Category */}
-        <div className="flex flex-col gap-1">
-          <Label>Category</Label>
-          <Select
-            value={categoryId ? String(categoryId) : "all"}
-            onValueChange={(val) =>
-              setCategoryId(val === "all" ? null : Number(val))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {filteredCategories.map((cat) => (
-                <SelectItem key={cat.id} value={String(cat.id)}>
-                  {cat.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Start Date */}
-        <div className="flex flex-col gap-1">
-          <Label>Start Date</Label>
-          <DatePicker
-            selected={startDate}
-            onSelect={(date) => date && setStartDate(date)}
-          />
-        </div>
-
-        {/* End Date */}
-        <div className="flex flex-col gap-1">
-          <Label>End Date</Label>
-          <DatePicker
-            selected={endDate}
-            onSelect={(date) => date && setEndDate(date)}
-          />
-        </div>
-      </div>
+    <div className="space-y-4">
+      {/* Filters */}
+      <TransactionExplorerFilter />
 
       {/* Action Buttons */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex justify-end gap-1">
         <Button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
+          onClick={handleAddTransaction}
         >
-          <PlusCircle className="w-4 h-4" />
-          Add Transaction
-        </Button>
-
-        <Button
-          variant="secondary"
-          onClick={() => setIsBulkIncomeModalOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Layers className="w-4 h-4" />
-          Add Bulk Income
+          <Plus size={16} />
         </Button>
         <Button
-          variant="outline"
-          onClick={() => setIsBulkExpenseModalOpen(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
+          onClick={() => setBulkDialogOpen(true)}
         >
-          <Layers className="w-4 h-4" />
-          Add Bulk Expense
+          <Layers size={16} />
+        </Button>
+        <Button
+          className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
+          onClick={() => {
+            if (accountStore.selectedAccountId) {
+              router.push(
+                `/finance/transaction/${accountStore.selectedAccountId}`
+              );
+            }
+          }}
+        >
+          <Compass size={16} className="cursor-pointer" />{" "}
         </Button>
       </div>
 
-      {/* Transaction List */}
-      {loading ? (
-        <TransactionExplorerListSkeleton />
-      ) : (
-        <TransactionExplorerList transactions={transactionStore.transactions} />
-      )}
+      {/* List / Skeleton */}
+      {loading ? <TransactionExplorerSkeleton /> : <TransactionExplorerList />}
 
       {/* Pagination */}
-      {transactionStore.meta && totalPages > 1 && (
-        <PaginationControl
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
+      {!loading && (
+        <Pagination
+          total={transactionStore.meta?.total ?? 0}
+          page={transactionStore.filters.page ?? 1}
+          pageSize={transactionStore.filters.pageSize ?? 25}
+          onPageChange={(newPage) => {
+            fetchTransactions({ page: newPage });
+          }}
+          onPageSizeChange={(newSize) => {
+            fetchTransactions({ page: 1, pageSize: newSize });
+          }}
         />
       )}
 
-      {/* Modals */}
-      <TransactionModal
-        open={showAddModal}
-        onClose={() => setShowAddModal(false)}
+      <TransactionDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        initialData={editData}
+        triggerRefreshAll={false}
       />
-      <BulkTransactionModal
-        open={isBulkIncomeModalOpen}
-        onClose={() => setIsBulkIncomeModalOpen(false)}
-        type="income"
-      />
-      <BulkTransactionModal
-        open={isBulkExpenseModalOpen}
-        onClose={() => setIsBulkExpenseModalOpen(false)}
-        type="expense"
+
+      <BulkTransactionDialog
+        open={bulkDialogOpen}
+        onClose={() => setBulkDialogOpen(false)}
       />
     </div>
   );
