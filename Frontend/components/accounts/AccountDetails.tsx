@@ -92,7 +92,6 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ id }) => {
       />
       <AccountMembers
         account={account}
-        roles={roles}
         refreshAccount={refreshAccount}
         permissions={permissions} // pass permissions as prop
       />
