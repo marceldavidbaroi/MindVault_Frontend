@@ -57,11 +57,10 @@ export default function AccountsList({
   }
 
   const onSelect = (item: AccessAccount) => {
-    setSelectedAccountId(item.id);
-
-    // 🔥 Redirect only if enabled
     if (enableRedirect) {
-      router.push(`${redirectBase}/${item.id}`);
+      router.push(`${redirectBase}/${item?.account?.id}`);
+    } else {
+      setSelectedAccountId(item?.account?.id);
     }
   };
 
@@ -105,7 +104,7 @@ export default function AccountsList({
                 bg-primary/10 
                 hover:bg-primary/20
                 cursor-pointer
-                ${item.id === selectedAccountId ? "bg-primary/30" : ""}
+                ${item.account.id === selectedAccountId ? "bg-primary/30" : ""}
               `}
             >
               <span className="font-medium text-sm text-primary-900 dark:text-primary-200">
@@ -137,7 +136,7 @@ export default function AccountsList({
             className={`
               px-3 py-2 cursor-pointer select-none
               hover:bg-primary/10 transition-all text-sm
-              ${item.id === selectedAccountId ? "bg-primary/20" : ""}
+              ${item.account.id === selectedAccountId ? "bg-primary/20" : ""}
             `}
           >
             <div className="flex justify-between items-center">

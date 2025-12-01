@@ -17,16 +17,24 @@ import { useRouter } from "next/navigation";
 import { TransactionDialog } from "./TransactionFormModal";
 import { BulkTransactionDialog } from "./BulkTransactionFormModal";
 import TransactionExplorerSkeleton from "./skeleton/TransactionExplorerIndexSkeleton";
+import { useAccountRole } from "@/composables/finance/accounts/useAccountRole";
 
 const TransactionExplorerIndex = () => {
   const transactionStore = useTransactionStore();
   const accountStore = useAccountStore();
+  const { getPermissions } = useAccountRole();
+
   const { refreshTransactions } = useTransactionRefresh();
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editData, setEditData] = useState<CreateTransactionDto | undefined>();
   const [loading, setLoading] = useState(true);
+  const [permissions, setPermissions] = useState({
+    isOwner: false,
+    isOwnerOrAdmin: false,
+    canEdit: false,
+  });
 
   const selectedAccountId = accountStore.selectedAccountId;
 
@@ -37,7 +45,8 @@ const TransactionExplorerIndex = () => {
     if (!selectedAccountId) return;
 
     setLoading(true);
-
+    const perms = await getPermissions(Number(accountStore.selectedAccountId));
+    setPermissions(perms);
     // Merge store filters with any custom ones
     const filtersToUse: FindTransactionsDto = {
       ...transactionStore.filters,
@@ -88,32 +97,34 @@ const TransactionExplorerIndex = () => {
       <TransactionExplorerFilter />
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-1">
-        <Button
-          className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
-          onClick={handleAddTransaction}
-        >
-          <Plus size={16} />
-        </Button>
-        <Button
-          className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
-          onClick={() => setBulkDialogOpen(true)}
-        >
-          <Layers size={16} />
-        </Button>
-        <Button
-          className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
-          onClick={() => {
-            if (accountStore.selectedAccountId) {
-              router.push(
-                `/finance/transaction/${accountStore.selectedAccountId}`
-              );
-            }
-          }}
-        >
-          <Compass size={16} className="cursor-pointer" />{" "}
-        </Button>
-      </div>
+      {permissions.canEdit && (
+        <div className="flex justify-end gap-1">
+          <Button
+            className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
+            onClick={handleAddTransaction}
+          >
+            <Plus size={16} />
+          </Button>
+          <Button
+            className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
+            onClick={() => setBulkDialogOpen(true)}
+          >
+            <Layers size={16} />
+          </Button>
+          <Button
+            className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
+            onClick={() => {
+              if (accountStore.selectedAccountId) {
+                router.push(
+                  `/finance/transaction/${accountStore.selectedAccountId}`
+                );
+              }
+            }}
+          >
+            <Compass size={16} className="cursor-pointer" />{" "}
+          </Button>
+        </div>
+      )}
 
       {/* List / Skeleton */}
       {loading ? <TransactionExplorerSkeleton /> : <TransactionExplorerList />}

@@ -180,7 +180,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {accountStore.accessAccounts.map((a) => (
-                  <SelectItem key={a.id} value={String(a.id)}>
+                  <SelectItem key={a.account.id} value={String(a.account.id)}>
                     {a.account.name}
                   </SelectItem>
                 ))}
@@ -188,7 +188,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             </Select>
             {renderError("accountId")}
           </div>
-
           {/* Type */}
           <div className="space-y-2">
             <Label>Type</Label>
@@ -208,7 +207,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             </RadioGroup>
             {renderError("type")}
           </div>
-
           {/* Category */}
           <div className="space-y-2">
             <Label>Category</Label>
@@ -222,14 +220,13 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               <SelectContent>
                 {filteredCategories.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
+                    {c.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {renderError("categoryId")}
           </div>
-
           {/* Currency */}
           <div className="space-y-2">
             <Label>Currency</Label>
@@ -249,7 +246,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-
           {/* Status */}
           <div className="space-y-2">
             <Label>Status</Label>
@@ -266,7 +262,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               ))}
             </RadioGroup>
           </div>
-
           {/* Amount */}
           <div className="space-y-2">
             <Label>Amount</Label>
@@ -279,7 +274,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             />
             {renderError("amount")}
           </div>
-
           {/* Date with Popover Calendar */}
           <div className="flex flex-col">
             <Label htmlFor="transaction-date" className="mb-1">
@@ -314,7 +308,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             </Popover>
             {renderError("transactionDate")}
           </div>
-
           {/* Description */}
           <div className="space-y-2">
             <Label>Description</Label>
@@ -325,7 +318,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               placeholder="Optional"
             />
           </div>
-
           {/* External Ref */}
           <div className="space-y-2">
             <Label>External Ref</Label>
@@ -336,7 +328,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               placeholder="Optional"
             />
           </div>
-
           {/* Recurring */}
           <div className="flex items-center gap-3">
             <Label>Recurring</Label>
@@ -346,7 +337,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               onChange={(e) => handleChange("recurring", e.target.checked)}
             />
           </div>
-
           {/* Recurring Interval */}
           {form.recurring && (
             <div className="space-y-2">

@@ -20,10 +20,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAccountStore } from "@/store/accountStore";
+import { useRoleStore } from "@/store/rolesStore";
 
 interface AccountMembersProps {
   account: any;
-  roles: any[];
   refreshAccount: () => void;
   permissions: {
     isOwner: boolean;
@@ -34,11 +34,11 @@ interface AccountMembersProps {
 
 const AccountMembers: React.FC<AccountMembersProps> = ({
   account,
-  roles,
   refreshAccount,
   permissions,
 }) => {
   const accountStore = useAccountStore();
+  const roleStore = useRoleStore();
 
   const [editingRoleId, setEditingRoleId] = useState<number | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
@@ -146,7 +146,7 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
                             <SelectValue placeholder="Select role" />
                           </SelectTrigger>
                           <SelectContent className="bg-background/95 backdrop-blur-lg">
-                            {roles.map((r) => (
+                            {roleStore.roles.map((r) => (
                               <SelectItem key={r.id} value={String(r.id)}>
                                 {r.displayName}
                               </SelectItem>
@@ -256,7 +256,7 @@ const AccountMembers: React.FC<AccountMembersProps> = ({
                 <SelectValue placeholder="Select Role" />
               </SelectTrigger>
               <SelectContent className="bg-background/95 backdrop-blur-lg">
-                {roles.map((r) => (
+                {roleStore.roles.map((r) => (
                   <SelectItem key={r.id} value={String(r.id)}>
                     {r.displayName}
                   </SelectItem>

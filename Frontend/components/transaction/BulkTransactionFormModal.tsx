@@ -314,7 +314,7 @@ export const BulkTransactionDialog: React.FC<BulkTransactionDialogProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {accountStore.accessAccounts.map((a) => (
-                    <SelectItem key={a.id} value={String(a.id)}>
+                    <SelectItem key={a.account.id} value={String(a.account.id)}>
                       {a.account.name}
                     </SelectItem>
                   ))}
@@ -476,7 +476,7 @@ export const BulkTransactionDialog: React.FC<BulkTransactionDialogProps> = ({
                     <SelectContent>
                       {filteredCategories.map((c) => (
                         <SelectItem key={c.id} value={String(c.id)}>
-                          {c.name}
+                          {c.displayName}
                         </SelectItem>
                       ))}
                     </SelectContent>
