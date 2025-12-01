@@ -49,59 +49,49 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
 
   // Set selected account safely
   useEffect(() => {
-    if (
-      selectedAccountId &&
-      selectedAccountId !== accountStore.selectedAccountId
-    ) {
-      accountStore.setSelectedAccountId(selectedAccountId);
-    }
-  }, [selectedAccountId]);
-
-  // Prevent double-run from hydration
-  const hasLoadedRef = useRef(false);
-  const prevAccountIdRef = useRef<any>(null);
-
-  useEffect(() => {
     const loadData = async () => {
-      const currentId = accountStore.selectedAccountId;
-
-      if (!currentId) return;
-
-      if (!hasLoadedRef.current) {
-        hasLoadedRef.current = true;
-      } else {
-        if (prevAccountIdRef.current === currentId) return;
-      }
-
-      prevAccountIdRef.current = currentId;
-
       try {
         setInitialLoading(true);
 
-        const perms = await getPermissions(Number(currentId));
+        const perms = await getPermissions(Number(selectedAccountId));
         setPermissions(perms);
 
-        await Promise.all([
-          accountStore.getAccountsWithAccess(),
-          categoryStore.getAllCategories(),
-          currencyStore.getAllCurrencies(),
-        ]);
-
-        await refreshAll(Number(currentId));
+        await refreshAll(Number(selectedAccountId));
       } catch (err) {
         // handle error silently
       } finally {
         setInitialLoading(false);
       }
     };
-
-    loadData();
-  }, [accountStore.selectedAccountId]);
+    if (
+      selectedAccountId &&
+      selectedAccountId !== accountStore.selectedAccountId
+    ) {
+      accountStore.setSelectedAccountId(selectedAccountId);
+      loadData();
+    }
+  }, [selectedAccountId]);
 
   const handleAddTransaction = () => {
     setEditData(undefined);
     setDialogOpen(true);
   };
+  // Fetch global/static data on mount
+  useEffect(() => {
+    const fetchGlobalData = async () => {
+      try {
+        await Promise.all([
+          accountStore.getAccountsWithAccess(),
+          categoryStore.getAllCategories(),
+          currencyStore.getAllCurrencies(),
+        ]);
+      } catch (err) {
+        console.error("Error fetching global data", err);
+      }
+    };
+
+    fetchGlobalData();
+  }, []); // empty dependency array → runs only once on mount
 
   return (
     <div className="h-full grid grid-cols-12 gap-3 p-3">
