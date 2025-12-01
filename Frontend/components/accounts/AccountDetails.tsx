@@ -45,7 +45,6 @@ const AccountDetails: React.FC<AccountDetailsProps> = ({ id }) => {
 
       // Get permissions for the current account
       const perms = await getPermissions(id);
-      console.log(perms);
       setPermissions(perms);
     } catch (error) {
       console.error("Failed to fetch account details:", error);

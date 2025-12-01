@@ -57,11 +57,10 @@ export default function AccountsList({
   }
 
   const onSelect = (item: AccessAccount) => {
-    setSelectedAccountId(item?.account?.id);
-
-    // 🔥 Redirect only if enabled
     if (enableRedirect) {
       router.push(`${redirectBase}/${item?.account?.id}`);
+    } else {
+      setSelectedAccountId(item?.account?.id);
     }
   };
 

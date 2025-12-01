@@ -476,7 +476,7 @@ export const BulkTransactionDialog: React.FC<BulkTransactionDialogProps> = ({
                     <SelectContent>
                       {filteredCategories.map((c) => (
                         <SelectItem key={c.id} value={String(c.id)}>
-                          {c.name}
+                          {c.displayName}
                         </SelectItem>
                       ))}
                     </SelectContent>

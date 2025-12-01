@@ -220,7 +220,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               <SelectContent>
                 {filteredCategories.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
+                    {c.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>

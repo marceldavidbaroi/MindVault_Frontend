@@ -20,6 +20,7 @@ import AccountsListSkeleton from "./skeleton/AccountsListSkeleton";
 import { BulkTransactionDialog } from "./BulkTransactionFormModal";
 import { useTransactionRefresh } from "@/composables/finance/transaction/useTransactionRefresh";
 import { useRouter } from "next/navigation";
+import { useAccountRole } from "@/composables/finance/accounts/useAccountRole";
 
 interface TransactionIndexProps {
   selectedAccountId: string | number | null;
@@ -33,31 +34,52 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
   const currencyStore = useCurrencyStore();
   const summaryStore = useSummaryStore();
   const router = useRouter();
-
+  const { getPermissions } = useAccountRole();
   const { refreshAll } = useTransactionRefresh();
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editData, setEditData] = useState<CreateTransactionDto | undefined>();
+  const [permissions, setPermissions] = useState({
+    isOwner: false,
+    isOwnerOrAdmin: false,
+    canEdit: false,
+  });
 
+  // Set selected account safely
   useEffect(() => {
-    accountStore.setSelectedAccountId(selectedAccountId);
+    if (
+      selectedAccountId &&
+      selectedAccountId !== accountStore.selectedAccountId
+    ) {
+      accountStore.setSelectedAccountId(selectedAccountId);
+    }
   }, [selectedAccountId]);
 
+  // Prevent double-run from hydration
+  const hasLoadedRef = useRef(false);
   const prevAccountIdRef = useRef<any>(null);
 
   useEffect(() => {
     const loadData = async () => {
+      const currentId = accountStore.selectedAccountId;
+
+      if (!currentId) return;
+
+      if (!hasLoadedRef.current) {
+        hasLoadedRef.current = true;
+      } else {
+        if (prevAccountIdRef.current === currentId) return;
+      }
+
+      prevAccountIdRef.current = currentId;
+
       try {
-        const currentId = accountStore.selectedAccountId;
-
-        // Only proceed if the account ID really changed
-        if (!currentId || prevAccountIdRef.current === currentId) return;
-
-        prevAccountIdRef.current = currentId; // update ref
-
         setInitialLoading(true);
+
+        const perms = await getPermissions(Number(currentId));
+        setPermissions(perms);
 
         await Promise.all([
           accountStore.getAccountsWithAccess(),
@@ -66,8 +88,8 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
         ]);
 
         await refreshAll(Number(currentId));
-      } catch {
-        console.log("some error occurred");
+      } catch (err) {
+        // handle error silently
       } finally {
         setInitialLoading(false);
       }
@@ -91,7 +113,6 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
       {/* RIGHT SIDE */}
       <div className="col-span-10">
         {!initialLoading && !accountStore.selectedAccount ? (
-          // 🔴 ACCOUNT NOT FOUND
           <div className="h-full flex items-center justify-center p-10">
             <div className="text-center space-y-3">
               <p className="text-lg font-semibold text-red-500">
@@ -103,34 +124,39 @@ const TransactionIndex: React.FC<TransactionIndexProps> = ({
             </div>
           </div>
         ) : (
-          // ✅ ACCOUNT FOUND - SHOW DASHBOARD
           <div className="grid grid-rows-[5%_25%_70%] gap-3 h-full">
             {/* BUTTONS */}
             <div className="flex justify-end gap-1">
-              <Button
-                className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
-                onClick={handleAddTransaction}
-              >
-                <Plus size={16} />
-              </Button>
-              <Button
-                className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
-                onClick={() => setBulkDialogOpen(true)}
-              >
-                <Layers size={16} />
-              </Button>
-              <Button
-                className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
-                onClick={() => {
-                  if (accountStore.selectedAccountId) {
-                    router.push(
-                      `/finance/transaction-explorer/${accountStore.selectedAccountId}`
-                    );
-                  }
-                }}
-              >
-                <Compass size={16} className="cursor-pointer" />{" "}
-              </Button>
+              {permissions.canEdit && (
+                <>
+                  <Button
+                    className="flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:brightness-110"
+                    onClick={handleAddTransaction}
+                  >
+                    <Plus size={16} />
+                  </Button>
+
+                  <Button
+                    className="flex items-center gap-2 bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:brightness-110"
+                    onClick={() => setBulkDialogOpen(true)}
+                  >
+                    <Layers size={16} />
+                  </Button>
+
+                  <Button
+                    className="flex items-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] hover:brightness-110"
+                    onClick={() => {
+                      if (accountStore.selectedAccountId) {
+                        router.push(
+                          `/finance/transaction-explorer/${accountStore.selectedAccountId}`
+                        );
+                      }
+                    }}
+                  >
+                    <Compass size={16} />
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* TOP SECTION */}
