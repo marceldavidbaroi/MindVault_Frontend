@@ -8,6 +8,8 @@ import { SECURITY_QUESTIONS_ENDPOINTS } from "./securityQuestions";
 import { CURRENCY_ENDPOINTS } from "./currency";
 import { ROLES_ENDPOINTS } from "./roles";
 import { SAVINGS_GOALS_ENDPOINTS } from "./savingsGoals";
+import { TAG_GROUPS_ENDPOINTS } from "./tagGroups";
+import { TAGS_ENDPOINTS } from "./tags";
 
 export const API_ENDPOINTS = {
   auth: AUTH_ENDPOINTS,
@@ -20,4 +22,6 @@ export const API_ENDPOINTS = {
   currency: CURRENCY_ENDPOINTS,
   roles: ROLES_ENDPOINTS,
   savingsGoals: SAVINGS_GOALS_ENDPOINTS,
+  tags: TAGS_ENDPOINTS,
+  tagGroups: TAG_GROUPS_ENDPOINTS,
 };
