@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ApiResponseToast } from "@/components/ApiResponseToast";
-import { UserInitializer } from "./UserInitializer"; // 👈 add this
+import { InitialDataProvider } from "./InitialDataProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <UserInitializer>
+        <InitialDataProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -40,7 +40,7 @@ export default function RootLayout({
             {children}
             <ApiResponseToast />
           </ThemeProvider>
-        </UserInitializer>
+        </InitialDataProvider>
       </body>
     </html>
   );

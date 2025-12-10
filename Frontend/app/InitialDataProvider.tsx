@@ -4,18 +4,27 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useUserStore } from "@/store/userStore";
 import { useRoleStore } from "@/store/rolesStore";
-import { cn } from "@/lib/utils";
+import { useTagStore } from "@/store/tagsStore";
 
-export function UserInitializer({ children }: { children: React.ReactNode }) {
+export function InitialDataProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const userStore = useUserStore();
   const roleStore = useRoleStore();
+  const tagStore = useTagStore();
 
   const [loading, setLoading] = useState(!userStore.initialized);
 
   const initializeUser = async () => {
     setLoading(true);
     try {
-      await Promise.all([roleStore.getAllRoles(), userStore.getProfile()]);
+      await Promise.all([
+        roleStore.getAllRoles(),
+        tagStore.getAllTags({ includeSystem: true, includeGroup: true }),
+        userStore.getProfile(),
+      ]);
     } catch (error) {
       console.error("Error initializing user:", error);
     } finally {
