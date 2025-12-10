@@ -1,5 +1,5 @@
 import CategoryIndex from "@/components/transaction_category/CategoryIndex";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { ApiResponse } from "@/types/ApiResponse.type";
 import { Category } from "@/types/Category.type";
@@ -16,7 +16,7 @@ const CategoryPage = async () => {
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  const stats: ApiResponse<any> = await fetcher(ENDPOINTS.category.stats, {
+  const stats: ApiResponse<any> = await fetcher(API_ENDPOINTS.category.stats, {
     method: "GET",
     headers: {
       cookie: cookieHeader,
@@ -25,7 +25,7 @@ const CategoryPage = async () => {
   });
 
   const categories: ApiResponse<Category[]> = await fetcher(
-    ENDPOINTS.category.all,
+    API_ENDPOINTS.category.all,
     {
       method: "GET",
       headers: {

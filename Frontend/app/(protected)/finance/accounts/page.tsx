@@ -1,5 +1,5 @@
 import AccountIndex from "@/components/accounts/AccountIndex";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { AccessAccount, Account } from "@/types/Account.type";
 import { ApiResponse } from "@/types/ApiResponse.type";
@@ -14,7 +14,7 @@ const AccountsPage = async () => {
     .join("; ");
 
   const myAccountRes: ApiResponse<Account[]> = await fetcher(
-    ENDPOINTS.accounts.my,
+    API_ENDPOINTS.accounts.my,
     {
       method: "GET",
       headers: { cookie: cookieHeader },
@@ -22,7 +22,7 @@ const AccountsPage = async () => {
     }
   );
   const accessAccountRes: ApiResponse<AccessAccount[]> = await fetcher(
-    ENDPOINTS.accounts.access,
+    API_ENDPOINTS.accounts.access,
     {
       method: "GET",
       headers: { cookie: cookieHeader },

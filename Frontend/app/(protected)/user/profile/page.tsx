@@ -1,5 +1,5 @@
 import UserIndex from "@/components/user/UserIndex";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { ApiResponse } from "@/types/ApiResponse.type";
 import { cookies } from "next/headers";
@@ -14,7 +14,7 @@ const ProfilePage = async () => {
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  const profile: ApiResponse<any> = await fetcher(ENDPOINTS.user.profile, {
+  const profile: ApiResponse<any> = await fetcher(API_ENDPOINTS.user.profile, {
     method: "GET",
     headers: {
       cookie: cookieHeader,

@@ -1,4 +1,4 @@
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { AccountTypeList } from "@/components/accounts/AccountTypeList";
 import { cookies } from "next/headers";
@@ -16,7 +16,7 @@ const AccountTypesPage = async () => {
     .join("; ");
 
   const accountTypesRes: ApiResponse<AccountType[]> = await fetcher(
-    ENDPOINTS.accounts.types.all,
+    API_ENDPOINTS.accounts.types.all,
     {
       method: "GET",
       headers: { cookie: cookieHeader },

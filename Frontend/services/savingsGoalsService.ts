@@ -1,5 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import {
   SavingsGoal,
   CreateSavingsGoalDto,
@@ -15,33 +15,33 @@ interface ApiResponse<T> {
 export const savingsGoalsService = {
   /** CREATE a new savings goal */
   create: (data: CreateSavingsGoalDto) =>
-    fetcher<ApiResponse<SavingsGoal>>(ENDPOINTS.savingsGoals.create, {
+    fetcher<ApiResponse<SavingsGoal>>(API_ENDPOINTS.savingsGoals.create, {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
   /** GET all my savings goals */
   my: () =>
-    fetcher<ApiResponse<SavingsGoal[]>>(ENDPOINTS.savingsGoals.my, {
+    fetcher<ApiResponse<SavingsGoal[]>>(API_ENDPOINTS.savingsGoals.my, {
       method: "GET",
     }),
 
   /** GET single savings goal by ID */
   getOne: (id: number) =>
-    fetcher<ApiResponse<SavingsGoal>>(ENDPOINTS.savingsGoals.getOne(id), {
+    fetcher<ApiResponse<SavingsGoal>>(API_ENDPOINTS.savingsGoals.getOne(id), {
       method: "GET",
     }),
 
   /** UPDATE a savings goal */
   update: (id: number, data: UpdateSavingsGoalDto) =>
-    fetcher<ApiResponse<SavingsGoal>>(ENDPOINTS.savingsGoals.update(id), {
+    fetcher<ApiResponse<SavingsGoal>>(API_ENDPOINTS.savingsGoals.update(id), {
       method: "PUT",
       body: JSON.stringify(data),
     }),
 
   /** DELETE a savings goal */
   remove: (id: number) =>
-    fetcher<ApiResponse<null>>(ENDPOINTS.savingsGoals.remove(id), {
+    fetcher<ApiResponse<null>>(API_ENDPOINTS.savingsGoals.remove(id), {
       method: "DELETE",
     }),
 };

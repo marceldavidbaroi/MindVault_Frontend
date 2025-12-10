@@ -1,5 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import {
   Category,
   CategoryStats,
@@ -15,40 +15,40 @@ export const categoryService = {
       ? "?" + new URLSearchParams(query as any).toString()
       : "";
     return fetcher<ApiResponse<Category[]>>(
-      `${ENDPOINTS.category.all}${params}`,
+      `${API_ENDPOINTS.category.all}${params}`,
       { method: "GET" }
     );
   },
 
   /** GET single category by ID */
   getOne: (id: number) =>
-    fetcher<ApiResponse<Category>>(ENDPOINTS.category.getOne(id), {
+    fetcher<ApiResponse<Category>>(API_ENDPOINTS.category.getOne(id), {
       method: "GET",
     }),
 
   /** CREATE a new category */
   create: (data: CreateCategoryDto) =>
-    fetcher<ApiResponse<Category>>(ENDPOINTS.category.create, {
+    fetcher<ApiResponse<Category>>(API_ENDPOINTS.category.create, {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
   /** UPDATE category by ID */
   update: (id: number, data: Partial<CreateCategoryDto>) =>
-    fetcher<ApiResponse<Category>>(ENDPOINTS.category.update(id), {
+    fetcher<ApiResponse<Category>>(API_ENDPOINTS.category.update(id), {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
 
   /** DELETE category by ID */
   remove: (id: number) =>
-    fetcher<ApiResponse<null>>(ENDPOINTS.category.remove(id), {
+    fetcher<ApiResponse<null>>(API_ENDPOINTS.category.remove(id), {
       method: "DELETE",
     }),
 
   /** GET category stats */
   getStats: () =>
-    fetcher<ApiResponse<CategoryStats>>(ENDPOINTS.category.stats, {
+    fetcher<ApiResponse<CategoryStats>>(API_ENDPOINTS.category.stats, {
       method: "GET",
     }),
 };

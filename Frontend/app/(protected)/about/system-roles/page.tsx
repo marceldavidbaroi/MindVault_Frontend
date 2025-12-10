@@ -1,7 +1,7 @@
 import React, { JSX } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Shield, UserCog, Eye, UserPen } from "lucide-react";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { ApiResponse } from "@/types/ApiResponse.type";
 import { cookies } from "next/headers";
@@ -21,7 +21,7 @@ const AboutPage = async () => {
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  const roles: ApiResponse<any> = await fetcher(ENDPOINTS.roles.getAll, {
+  const roles: ApiResponse<any> = await fetcher(API_ENDPOINTS.roles.getAll, {
     method: "GET",
     headers: {
       cookie: cookieHeader,

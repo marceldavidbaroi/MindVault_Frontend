@@ -1,7 +1,7 @@
 import AccountsList from "@/components/transaction/AccountList";
 import CreateAccountButton from "@/components/transaction/CreateAccountButton";
 import TransactionIndex from "@/components/transaction/TransactionIndex";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { AccessAccount } from "@/types/Account.type";
 import { ApiResponse } from "@/types/ApiResponse.type";
@@ -23,7 +23,7 @@ const TransactionPage = async ({ params }: TransactionPageProps) => {
   // ✅ Check if accountId exists and convert to number
 
   const accessAccountRes: ApiResponse<AccessAccount[]> = await fetcher(
-    ENDPOINTS.accounts.access,
+    API_ENDPOINTS.accounts.access,
     {
       method: "GET",
       headers: { cookie: cookieHeader },

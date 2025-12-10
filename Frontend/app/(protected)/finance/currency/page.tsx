@@ -1,5 +1,5 @@
 import CurrencyIndex from "@/components/currency/CurrencyIndex";
-import { ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS } from "@/config/api";
 import { fetcher } from "@/lib/fetcher";
 import { ApiResponse } from "@/types/ApiResponse.type";
 import { cookies } from "next/headers";
@@ -13,13 +13,16 @@ const currencyPage = async () => {
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  const currencies: ApiResponse<any> = await fetcher(ENDPOINTS.currency.get, {
-    method: "GET",
-    headers: {
-      cookie: cookieHeader,
-    },
-    cache: "no-store",
-  });
+  const currencies: ApiResponse<any> = await fetcher(
+    API_ENDPOINTS.currency.get,
+    {
+      method: "GET",
+      headers: {
+        cookie: cookieHeader,
+      },
+      cache: "no-store",
+    }
+  );
   return (
     <div>
       <CurrencyIndex currencies={currencies.data} />
