@@ -1,5 +1,28 @@
 # 🧑‍💻 MindVault Frontend — Developer Guide
 
+---
+
+## 📑 Table of Contents
+
+1. [Project Overview](#1-project-overview)
+2. [Folder Structure & Naming Conventions](#2-folder-structure--naming-conventions)
+
+   - [2.1 App Directory (`app/`)](#21-app-directory-app)
+   - [2.2 Components (`components/`)](#22-components-components)
+   - [2.3 Lib & Utils](#23-lib--utils)
+   - [2.4 Store (Zustand)](#24-store-zustand)
+   - [2.5 Composables](#25-composables)
+   - [2.6 Config & Constants](#26-config--constants)
+   - [2.7 Pages & Dialogs](#27-pages--dialogs)
+   - [2.8 CSS & Tailwind](#28-css--tailwind)
+   - [2.9 API Calls](#29-api-calls)
+   - [2.10 Naming Summary](#210-naming-summary)
+   - [2.11 Best Practices](#211-best-practices)
+   - [2.12 Initial Data Provider](#212-initial-data-provider)
+   - [2.13 Global API Response Toast (`ApiResponseToast`)](#213-global-api-response-toast-apiresponsetoast)
+
+---
+
 ## 1. Project Overview
 
 MindVault is a **Finance + Auth + Productivity web app** built with **Next.js (app directory)** and **TypeScript**.
@@ -238,3 +261,69 @@ export const navConfig: NavItem[] = [
 7. Utility logic split into `lib/` (framework) vs `utils/` (pure logic).
 
 ---
+
+### 2.12 Initial Data Provider
+
+For **centralized app bootstrap data fetching**, see the dedicated guide:
+
+📄 [`InitialDataProvider` Cheat Sheet](../Frontend/app//InitialDataProvider.readme.md)
+
+- Ensures **all global and user-related data** is fetched before UI renders.
+- Handles **loading state** and **error management**.
+- Ideal for fetching **profile, roles, tags, settings, notifications**, and other critical global data.
+- Should wrap the **entire app** to prevent incomplete renders.
+
+---
+
+### 2.13 Global API Response Toast (`ApiResponseToast`)
+
+**Purpose:**
+Displays **success or error notifications** for all API calls throughout the app using the `Sonner` toast library.
+
+**How It Works:**
+
+1. The **Zustand `notificationStore`** holds a single `response` object:
+
+```ts
+interface ApiResponseNotification {
+  success: boolean;
+  message?: string;
+}
+```
+
+2. Any API call using the **universal `fetcher`** sets `response` in the store:
+
+- Success → `toast.success(message)`
+- Error → `toast.error(message)`
+
+3. The **`ApiResponseToast` component** listens to the store and automatically shows a toast whenever `response` is updated. It resets the store afterward to prevent repeated notifications.
+
+**Integration:**
+
+- Already wrapped in `RootLayout` → **all pages/components automatically show notifications**.
+- Position, style, and behavior can be customized directly in `components/ApiResponseToast.tsx`:
+
+```tsx
+<Toaster
+  position="bottom-left" // adjust to top-right, top-left, etc.
+  richColors
+  closeButton
+  expand
+  toastOptions={{ duration: 4000 }}
+/>
+```
+
+**Developer Notes:**
+
+- **Changing the position or style:** Edit the `<Toaster />` props in `ApiResponseToast.tsx`.
+- **Adding custom behavior:** Wrap or replace `toast.success` / `toast.error` calls as needed.
+- **Store usage:** Can manually trigger notifications anywhere by importing `useNotificationStore`:
+
+```ts
+useNotificationStore
+  .getState()
+  .setResponse({ success: true, message: "Custom message" });
+```
+
+**Summary:**
+`ApiResponseToast` is a **centralized notification system** for API responses. Developers can tweak **position, appearance, and behavior** without changing API calls.
