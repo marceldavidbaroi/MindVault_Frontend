@@ -118,6 +118,11 @@ export const navConfig: NavItem[] = [
         href: "/about/system-roles",
         description: "All the system declared roles.",
       },
+      {
+        title: "Tags",
+        href: "/tags",
+        description: "Manage and explore all tags in the system.",
+      },
     ],
   },
 ];

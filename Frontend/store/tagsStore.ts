@@ -18,7 +18,8 @@ export const useTagStore = create<TagState>((set, get) => ({
 
   getAllTagGroups: async (params?: QueryTagGroupDto) => {
     const res = await tagService.getAllGroups(params);
-    if (res.success && res.data) set({ tagGroups: res.data });
+    if (res.success && res.data && !params?.onlyDeleted)
+      set({ tagGroups: res.data });
     return res;
   },
 
@@ -77,7 +78,8 @@ export const useTagStore = create<TagState>((set, get) => ({
 
   getAllTags: async (params?: QueryTagDto) => {
     const res = await tagService.getAllTags(params);
-    if (res.success && res.data) set({ tags: res.data });
+    if (res.success && res.data && !params?.onlyDeleted)
+      set({ tags: res.data });
     return res;
   },
 

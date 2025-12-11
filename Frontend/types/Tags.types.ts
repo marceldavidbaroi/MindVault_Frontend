@@ -59,6 +59,7 @@ export interface QueryTagDto {
   groupId?: number;
   includeSystem?: boolean;
   includeDeleted?: boolean;
+  onlyDeleted?: boolean;
   limit?: number;
   page?: number;
   includeGroup?: boolean;
