@@ -16,92 +16,76 @@ import * as LucideIcons from "lucide-react";
 import { TAG_ICONS } from "@/constants/icons";
 import { useTagStore } from "@/store/tagsStore";
 
-const SOFT_COLORS = [
-  "#FFD6A5",
-  "#FFABAB",
-  "#CDB4DB",
-  "#B5EAEA",
-  "#FFE1A8",
-  "#F9F871",
-  "#FFDAC1",
-  "#A7F3D0",
-  "#D1D5DB",
-  "#FECACA",
-  "#E9D5FF",
-  "#BAE6FD",
-  "#FDE68A",
-  "#D9F99D",
-];
-
-interface CreateTagDto {
+interface TagGroupDto {
   name: string;
   displayName: string;
   description?: string;
   icon?: string;
-  color?: string;
-  groupId?: number;
 }
 
-interface TagData extends CreateTagDto {
-  id: number;
+interface TagGroupWithId extends TagGroupDto {
+  id: number; // or string depending on your backend
 }
 
-export function TagDialog({
+export function GroupFormDialog({
   open,
   onOpenChange,
-  groupId,
   initialData,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  groupId: number;
-  initialData?: TagData; // <= optional for editing
+  initialData?: TagGroupWithId; // ⬅️ When passed = edit mode
 }) {
-  const createTag = useTagStore((s) => s.createTag);
-  const updateTag = useTagStore((s) => s.updateTag);
+  const createTagGroup = useTagStore((s) => s.createTagGroup);
+  const updateTagGroup = useTagStore((s) => s.updateTagGroup); // for edit mode
 
-  const [form, setForm] = useState<CreateTagDto>({
+  // ------------------------
+  // Local State
+  // ------------------------
+  const [form, setForm] = useState<TagGroupDto>({
     name: "",
     displayName: "",
     description: "",
     icon: TAG_ICONS[0],
-    color: SOFT_COLORS[0],
-    groupId,
   });
 
-  // 🔄 Load initial data when editing
+  // ------------------------
+  // Prefill for Edit Mode
+  // ------------------------
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        name: initialData.name,
-        displayName: initialData.displayName,
-        description: initialData.description,
-        icon: initialData.icon,
-        color: initialData.color,
-        groupId: initialData.groupId,
-      });
-    } else {
-      // reset when switching from edit → create
-      setForm({
-        name: "",
-        displayName: "",
-        description: "",
-        icon: TAG_ICONS[0],
-        color: SOFT_COLORS[0],
-        groupId,
-      });
+    if (open) {
+      if (initialData) {
+        // ---- Edit Mode ----
+        setForm({
+          name: initialData.name ?? "",
+          displayName: initialData.displayName ?? "",
+          description: initialData.description ?? "",
+          icon: initialData.icon ?? TAG_ICONS[0],
+        });
+      } else {
+        // ---- Create Mode ----
+        setForm({
+          name: "",
+          displayName: "",
+          description: "",
+          icon: TAG_ICONS[0],
+        });
+      }
     }
-  }, [initialData, groupId]);
+  }, [open, initialData]);
 
+  // ------------------------
+  // Submit Logic
+  // ------------------------
   const onSubmit = async () => {
     let res;
 
-    if (initialData) {
+    if (initialData?.id) {
       // EDIT MODE
-      res = await updateTag(initialData.id, form);
+      res = await updateTagGroup(initialData.id, form);
     } else {
       // CREATE MODE
-      res = await createTag(form);
+      res = await createTagGroup(form);
     }
 
     if (res.success) {
@@ -109,11 +93,13 @@ export function TagDialog({
     }
   };
 
+  const isEdit = !!initialData;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{initialData ? "Edit Tag" : "Create Tag"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Group" : "Create Group"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -158,7 +144,7 @@ export function TagDialog({
                   return (
                     <div
                       key={iconName}
-                      className={`p-1 rounded cursor-pointer border hover:bg-background flex items-center justify-center ${
+                      className={`p-1 rounded cursor-pointer border hover:bg-accent flex items-center justify-center ${
                         form.icon === iconName ? "ring-2 ring-blue-500" : ""
                       }`}
                       onClick={() => setForm({ ...form, icon: iconName })}
@@ -170,28 +156,11 @@ export function TagDialog({
               </div>
             </ScrollArea>
           </div>
-
-          {/* Color Picker */}
-          <div>
-            <Label>Color</Label>
-            <div className="flex gap-2 flex-wrap mt-1">
-              {SOFT_COLORS.map((color) => (
-                <div
-                  key={color}
-                  className={`w-6 h-6 rounded cursor-pointer border ${
-                    form.color === color ? "border-black" : ""
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setForm({ ...form, color })}
-                />
-              ))}
-            </div>
-          </div>
         </div>
 
         <DialogFooter>
           <Button onClick={onSubmit}>
-            {initialData ? "Save Changes" : "Create"}
+            {isEdit ? "Save Changes" : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>

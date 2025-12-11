@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Recycle, Search, User, X } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { CreateGroupDialog } from "./CreateGroupDialog";
-import { TagDialog } from "./CreateTagDialog";
+import { GroupFormDialog } from "./GroupFormDialog";
+import { TagFormDialog } from "./TagFormDialog";
 import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "../common/ConfirmDeleteModal";
 import { TagDetailsDialog } from "./TagDetailsDialog";
@@ -191,12 +191,12 @@ export function TagsIndex() {
 
       {/* Groups & Tags */}
       <div className="p-6 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <CreateGroupDialog
+        <GroupFormDialog
           open={createGroupOpen}
           onOpenChange={setCreateGroupOpen}
         />
         {selectedGroupId !== null && (
-          <TagDialog
+          <TagFormDialog
             open={createTagOpen}
             onOpenChange={setCreateTagOpen}
             groupId={selectedGroupId}
@@ -308,7 +308,7 @@ export function TagsIndex() {
         description="Are you sure you want to delete this tag group?"
       />
 
-      <CreateGroupDialog
+      <GroupFormDialog
         open={showEditGroupDialog}
         onOpenChange={setShowEditGroupDialog}
         initialData={selectedGroup}
@@ -322,7 +322,7 @@ export function TagsIndex() {
         onDelete={() => handleDeleteTagClick(selectedTag)}
       />
 
-      <TagDialog
+      <TagFormDialog
         open={showEditTagDialog}
         onOpenChange={setShowEditTagDialog}
         groupId={selectedTagEdit?.group?.id}

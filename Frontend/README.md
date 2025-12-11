@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MindVault Frontend
 
-## Getting Started
+**MindVault Frontend** is a **Finance + Auth + Productivity web app** built with **Next.js (App Router)** and **TypeScript**, providing a responsive, modular, and user-friendly interface for managing personal finance and productivity features.
 
-First, run the development server:
+The frontend communicates with the **MindVault Backend** API for authentication, data fetching, and operations.
+
+---
+
+## Table of Contents
+
+1. [Repository](#repository)
+2. [Project Overview](#project-overview)
+3. [Tech Stack](#tech-stack)
+4. [Environment Variables](#environment-variables)
+5. [Run Instructions](#run-instructions)
+6. [Build & Production](#build--production)
+7. [Folder Structure & Naming](#folder-structure--naming)
+8. [Global Features](#global-features)
+9. [Links](#links)
+
+---
+
+## Repository
+
+- GitHub: [https://github.com/marceldavidbaroi/MindVault_Frontend](https://github.com/marceldavidbaroi/MindVault_Frontend)
+
+---
+
+## Project Overview
+
+MindVault Frontend provides a **modular, role-aware, and interactive UI** for the MindVault platform.
+
+Key Features:
+
+- **Authentication & User Management** – Signup, login, profile management, and session handling.
+- **Finance Management** – View accounts, transactions, summaries, and reports.
+- **Modular UI Components** – Built with **ShadCN** components and **Lucide icons**.
+- **State Management** – Client-side state managed via **Zustand**.
+- **Notifications** – Global API response notifications using **Sonner**.
+- **Reactivity & Animations** – Smooth animations with **Framer Motion**.
+- **Charts & Graphs** – Visualize finance data using **Recharts** and **Chart.js**.
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **Styling:** TailwindCSS, Tailwind Variants
+- **UI Components:** ShadCN, Radix UI, Lucide icons
+- **Charts & Data Visualization:** Chart.js, React Chart.js 2, Recharts, Ant Design Plots
+- **State Management:** Zustand
+- **Forms & Validation:** React Hook Form, Zod
+- **Notifications:** Sonner
+- **Animations:** Framer Motion
+- **Date Handling:** date-fns
+
+---
+
+## Environment Variables
+
+Create a `.env.local` file in the root with the following:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+```
+
+This points to the backend API.
+
+---
+
+## Run Instructions
+
+1. **Install dependencies**:
+
+```bash
+npm install
+```
+
+2. **Run the development server** (default port `3001`):
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open [http://localhost:3001](http://localhost:3001) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Build & Production
 
-## Learn More
+1. **Build for production**:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Start the production server**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run start
+```
 
-## Deploy on Vercel
+> By default, Next.js handles static optimization, SSR, and incremental builds.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Folder Structure & Naming
+
+- **`app/`** → Pages and layouts, follows Next.js App Router structure
+- **`components/`** → Domain-specific and shared UI components
+- **`lib/`** → API fetcher and framework-level helpers
+- **`utils/`** → Pure utility functions (global vs module-specific)
+- **`store/`** → Zustand stores for state management
+- **`composables/`** → Reusable hooks
+
+For detailed conventions and naming, see the [Frontend Developer Guide](./DeveloperGuide.md).
+
+---
+
+## Global Features
+
+- **Initial Data Provider**: Pre-fetches global user and app data at startup to prevent UI errors.
+- **API Response Toast**: Displays global success/error notifications for API calls using **Sonner**. Configurable in `components/ApiResponseToast.tsx`.
+
+---
+
+## Links
+
+- Backend Repository: [MindVault Backend](https://github.com/marceldavidbaroi/MindVault_Backend)
+- API Docs (local): [http://localhost:3000/api/v1/docs#/](http://localhost:3000/api/v1/docs#/)
+
+---
+
+✅ **MindVault Frontend** is designed to be modular, scalable, and user-friendly, providing a solid interface for financial and productivity operations while integrating seamlessly with the backend.
+
+---
