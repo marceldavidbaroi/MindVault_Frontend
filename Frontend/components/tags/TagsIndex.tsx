@@ -10,23 +10,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Recycle, Search, Trash, User, X } from "lucide-react";
-
+import { MoreVertical, Recycle, Search, User, X } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { CreateGroupDialog } from "./CreateGroupDialog";
-import { CreateTagDialog } from "./CreateTagDialog";
+import { TagDialog } from "./CreateTagDialog";
 import { useRouter } from "next/navigation";
 import { ConfirmDeleteModal } from "../common/ConfirmDeleteModal";
+import { TagDetailsDialog } from "./TagDetailsDialog";
+import { toPascalCase } from "@/lib/utils";
 
-// Convert kebab-case or snake_case to PascalCase for Lucide icons
-function toPascalCase(str: string) {
-  return str
-    .split(/[-_]/)
-    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join("");
-}
-
-// Auto contrast
+// Auto contrast helper
 function getContrastYIQ(hexcolor: string) {
   hexcolor = hexcolor.replace("#", "");
   const r = parseInt(hexcolor.substr(0, 2), 16);
@@ -39,16 +32,36 @@ function getContrastYIQ(hexcolor: string) {
 export function TagsIndex() {
   const tagsStore = useTagStore();
   const { tags, tagGroups } = tagsStore;
+  const router = useRouter();
 
-  const [createTagOpen, setCreateTagOpen] = useState(false);
+  // ✅ UI state
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [createTagOpen, setCreateTagOpen] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [confirmGroupDeleteOpen, setConfirmGroupDeleteOpen] = useState(false);
+  const [selectedGroupToDelete, setSelectedGroupToDelete] = useState<
+    number | null
+  >(null);
+
+  const [showEditGroupDialog, setShowEditGroupDialog] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+
+  const [selectedTag, setSelectedTag] = useState<any>(null);
+  const [selectedTagEdit, setSelectedTagEdit] = useState<any>(null);
+  const [showTagDetails, setShowTagDetails] = useState(false);
+  const [showEditTagDialog, setShowEditTagDialog] = useState(false);
+
+  const [confirmTagDeleteOpen, setConfirmTagDeleteOpen] = useState(false);
+  const [selectedTagToDelete, setSelectedTagToDelete] = useState<any>(null);
+
+  // ✅ Fetch data
   useEffect(() => {
     tagsStore.getAllTagGroups({ includeSystem: true });
   }, []);
 
-  // Group tags by groupId
+  // ✅ Group tags by groupId
   const groupedTags: Record<number, typeof tags> = {};
   tags.forEach((tag) => {
     if (!groupedTags[tag.groupId!]) groupedTags[tag.groupId!] = [];
@@ -56,69 +69,101 @@ export function TagsIndex() {
   });
 
   const sortedGroups = [...tagGroups];
-  const [searchQuery, setSearchQuery] = useState("");
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedGroupToDelete, setSelectedGroupToDelete] = useState<
-    number | null
-  >(null);
-  const router = useRouter();
 
+  // -----------------------------
+  // 🟢 Handlers
+  // -----------------------------
   const handleSearchKeyDown = async (
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Enter") {
-      console.log("Search query:", searchQuery);
       await tagsStore.getAllTags({ q: searchQuery, includeSystem: true });
-      // optionally, redirect to search results page
-      // router.push(`/tags/search?q=${searchQuery}`);
     }
   };
 
-  const handleRecycleClick = () => {
-    router.push("/tags/recycle");
-  };
-
-  const handleClear = async () => {
-    console.log("Clearing search:", searchQuery);
-
+  const handleClearSearch = async () => {
     setSearchQuery("");
     await tagsStore.getAllTags({ includeSystem: true });
   };
-  // Open confirm dialog
+
+  const handleRecycleClick = () => router.push("/tags/recycle");
+
+  // ✅ Group deletion
   const handleDeleteGroupClick = (groupId: number) => {
     setSelectedGroupToDelete(groupId);
-    setConfirmOpen(true);
+    setConfirmGroupDeleteOpen(true);
   };
-
-  // Confirm deletion
-  const handleConfirmDelete = async () => {
+  const handleConfirmDeleteGroup = async () => {
     if (selectedGroupToDelete === null) return;
-
-    try {
-      const res = await tagsStore.deleteTagGroup(selectedGroupToDelete);
-      if (res.success) {
-        console.log("Group deleted");
-      } else {
-        console.error("Failed to delete group:", res.message);
-      }
-    } catch (error) {
-      console.error("Error deleting group:", error);
-    } finally {
-      setConfirmOpen(false);
-      setSelectedGroupToDelete(null);
-    }
+    const res = await tagsStore.deleteTagGroup(selectedGroupToDelete);
+    if (!res.success) console.error(res.message);
+    setConfirmGroupDeleteOpen(false);
+    setSelectedGroupToDelete(null);
   };
-
-  // Cancel deletion
-  const handleCancelDelete = () => {
-    setConfirmOpen(false);
+  const handleCancelDeleteGroup = () => {
+    setConfirmGroupDeleteOpen(false);
     setSelectedGroupToDelete(null);
   };
 
+  // ✅ Group edit
+  const handleEditGroup = async (id: number) => {
+    const { data } = await tagsStore.getTagGroup(id);
+    setSelectedGroup({
+      id: data.id,
+      name: data.name,
+      displayName: data.displayName,
+      description: data.description,
+      icon: data.icon,
+    });
+    setShowEditGroupDialog(true);
+  };
+
+  // ✅ Tag click / details
+  const handleTagClick = async (tagId: number) => {
+    const res = await tagsStore.getTag(tagId);
+    if (res.success) setSelectedTag(res.data), setShowTagDetails(true);
+  };
+
+  // ✅ Tag edit
+  const handleEditTag = () => {
+    setSelectedTagEdit({
+      id: selectedTag.id,
+      name: selectedTag.name,
+      displayName: selectedTag.displayName,
+      description: selectedTag.description,
+      icon: selectedTag.icon,
+      color: selectedTag.color,
+      groupId: selectedTag.group.id,
+    });
+    setShowEditTagDialog(true);
+    setShowTagDetails(false);
+  };
+
+  // ✅ Tag deletion
+  const handleDeleteTagClick = (tag: any) => {
+    setSelectedTagToDelete(tag);
+    setConfirmTagDeleteOpen(true);
+  };
+  const handleConfirmDeleteTag = async () => {
+    if (!selectedTagToDelete) return;
+    const res = await tagsStore.deleteTag(selectedTagToDelete.id);
+    if (!res.success) console.error(res.message);
+    setSelectedTagToDelete(null);
+    setConfirmTagDeleteOpen(false);
+    setShowTagDetails(false);
+  };
+  const handleCancelDeleteTag = () => {
+    setSelectedTagToDelete(null);
+    setConfirmTagDeleteOpen(false);
+  };
+
+  // -----------------------------
+  // 🟢 Render
+  // -----------------------------
   return (
     <div>
+      {/* Search & Recycle */}
       <div className="flex items-center justify-end gap-3 w-full">
-        {/* Search box */}
         <div className="relative w-full max-w-sm">
           <input
             type="text"
@@ -128,26 +173,20 @@ export function TagsIndex() {
             onKeyDown={handleSearchKeyDown}
             className="pl-9 pr-8 py-2 rounded-md border bg-background/60 backdrop-blur-md w-full"
           />
-
-          {/* Search icon */}
           <Search
             size={16}
             className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
-
-          {/* Clear button */}
           {searchQuery && (
             <button
               type="button"
-              onClick={handleClear}
+              onClick={handleClearSearch}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-red-500"
             >
               <X size={16} />
             </button>
           )}
         </div>
-
-        {/* Recycle button */}
         <button
           type="button"
           onClick={handleRecycleClick}
@@ -160,18 +199,20 @@ export function TagsIndex() {
         </button>
       </div>
 
+      {/* Groups & Tags */}
       <div className="p-6 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <CreateGroupDialog
           open={createGroupOpen}
           onOpenChange={setCreateGroupOpen}
         />
         {selectedGroupId !== null && (
-          <CreateTagDialog
+          <TagDialog
             open={createTagOpen}
             onOpenChange={setCreateTagOpen}
             groupId={selectedGroupId}
           />
         )}
+
         {/* Add Group Card */}
         <Card
           className="flex items-center justify-center h-48 cursor-pointer bg-background/60 backdrop-blur-md shadow hover:scale-105 transition"
@@ -181,15 +222,16 @@ export function TagsIndex() {
             <h2 className="text-xl font-semibold">+ Add Group</h2>
           </CardContent>
         </Card>
-        {/* Render each group */}
+
+        {/* Render Groups */}
         {sortedGroups.map((group) => {
-          // Resolve group icon
           const iconNamePascal = group.icon ? toPascalCase(group.icon) : "";
           const GroupIcon =
             iconNamePascal &&
             LucideIcons[iconNamePascal as keyof typeof LucideIcons]
               ? (LucideIcons[iconNamePascal as keyof typeof LucideIcons] as any)
               : null;
+
           return (
             <Card
               key={group.id}
@@ -219,9 +261,7 @@ export function TagsIndex() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem
-                          onClick={() =>
-                            console.log("Edit group:", group.displayName)
-                          }
+                          onClick={() => handleEditGroup(group.id)}
                         >
                           Edit
                         </DropdownMenuItem>
@@ -235,7 +275,7 @@ export function TagsIndex() {
                   )}
                 </div>
               </CardHeader>
-              {/* Tags */}
+
               <CardContent className="flex flex-wrap gap-2 mt-2">
                 {(groupedTags[group.id] || []).map((tag) => {
                   const textColor = getContrastYIQ(tag.color!);
@@ -247,11 +287,13 @@ export function TagsIndex() {
                           iconNamePascal as keyof typeof LucideIcons
                         ] as any)
                       : null;
+
                   return (
                     <span
                       key={tag.id}
                       className="px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:scale-105 transition-transform flex items-center gap-1"
                       style={{ backgroundColor: tag.color!, color: textColor }}
+                      onClick={() => handleTagClick(tag.id)}
                     >
                       {IconComponent && <IconComponent size={16} />}
                       {tag.displayName}
@@ -266,12 +308,43 @@ export function TagsIndex() {
           );
         })}
       </div>
+
+      {/* Modals */}
       <ConfirmDeleteModal
-        open={confirmOpen}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        title="Delete Transaction"
+        open={confirmGroupDeleteOpen}
+        onClose={handleCancelDeleteGroup}
+        onConfirm={handleConfirmDeleteGroup}
+        title="Delete Group"
         description="Are you sure you want to delete this tag group?"
+      />
+
+      <CreateGroupDialog
+        open={showEditGroupDialog}
+        onOpenChange={setShowEditGroupDialog}
+        initialData={selectedGroup}
+      />
+
+      <TagDetailsDialog
+        open={showTagDetails}
+        onOpenChange={setShowTagDetails}
+        initialData={selectedTag}
+        onEdit={handleEditTag}
+        onDelete={() => handleDeleteTagClick(selectedTag)}
+      />
+
+      <TagDialog
+        open={showEditTagDialog}
+        onOpenChange={setShowEditTagDialog}
+        groupId={selectedTagEdit?.group?.id}
+        initialData={selectedTagEdit}
+      />
+
+      <ConfirmDeleteModal
+        open={confirmTagDeleteOpen}
+        onClose={handleCancelDeleteTag}
+        onConfirm={handleConfirmDeleteTag}
+        title="Delete Tag"
+        description={`Are you sure you want to delete the tag "${selectedTagToDelete?.displayName}"?`}
       />
     </div>
   );

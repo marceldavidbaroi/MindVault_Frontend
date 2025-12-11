@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,6 +24,13 @@ const SOFT_COLORS = [
   "#FFE1A8",
   "#F9F871",
   "#FFDAC1",
+  "#A7F3D0",
+  "#D1D5DB",
+  "#FECACA",
+  "#E9D5FF",
+  "#BAE6FD",
+  "#FDE68A",
+  "#D9F99D",
 ];
 
 interface CreateTagDto {
@@ -35,16 +42,23 @@ interface CreateTagDto {
   groupId?: number;
 }
 
-export function CreateTagDialog({
+interface TagData extends CreateTagDto {
+  id: number;
+}
+
+export function TagDialog({
   open,
   onOpenChange,
   groupId,
+  initialData,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   groupId: number;
+  initialData?: TagData; // <= optional for editing
 }) {
   const createTag = useTagStore((s) => s.createTag);
+  const updateTag = useTagStore((s) => s.updateTag);
 
   const [form, setForm] = useState<CreateTagDto>({
     name: "",
@@ -55,8 +69,41 @@ export function CreateTagDialog({
     groupId,
   });
 
+  // 🔄 Load initial data when editing
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name,
+        displayName: initialData.displayName,
+        description: initialData.description,
+        icon: initialData.icon,
+        color: initialData.color,
+        groupId: initialData.groupId,
+      });
+    } else {
+      // reset when switching from edit → create
+      setForm({
+        name: "",
+        displayName: "",
+        description: "",
+        icon: TAG_ICONS[0],
+        color: SOFT_COLORS[0],
+        groupId,
+      });
+    }
+  }, [initialData, groupId]);
+
   const onSubmit = async () => {
-    const res = await createTag(form);
+    let res;
+
+    if (initialData) {
+      // EDIT MODE
+      res = await updateTag(initialData.id, form);
+    } else {
+      // CREATE MODE
+      res = await createTag(form);
+    }
+
     if (res.success) {
       onOpenChange(false);
     }
@@ -66,7 +113,7 @@ export function CreateTagDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Tag</DialogTitle>
+          <DialogTitle>{initialData ? "Edit Tag" : "Create Tag"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -143,7 +190,9 @@ export function CreateTagDialog({
         </div>
 
         <DialogFooter>
-          <Button onClick={onSubmit}>Create</Button>
+          <Button onClick={onSubmit}>
+            {initialData ? "Save Changes" : "Create"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

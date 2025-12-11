@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,41 +16,90 @@ import * as LucideIcons from "lucide-react";
 import { TAG_ICONS } from "@/constants/icons";
 import { useTagStore } from "@/store/tagsStore";
 
-interface CreateTagGroupDto {
+interface TagGroupDto {
   name: string;
   displayName: string;
   description?: string;
   icon?: string;
 }
 
+interface TagGroupWithId extends TagGroupDto {
+  id: number; // or string depending on your backend
+}
+
 export function CreateGroupDialog({
   open,
   onOpenChange,
+  initialData,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  initialData?: TagGroupWithId; // ⬅️ When passed = edit mode
 }) {
   const createTagGroup = useTagStore((s) => s.createTagGroup);
+  const updateTagGroup = useTagStore((s) => s.updateTagGroup); // for edit mode
 
-  const [form, setForm] = useState<CreateTagGroupDto>({
+  // ------------------------
+  // Local State
+  // ------------------------
+  const [form, setForm] = useState<TagGroupDto>({
     name: "",
     displayName: "",
     description: "",
     icon: TAG_ICONS[0],
   });
 
+  // ------------------------
+  // Prefill for Edit Mode
+  // ------------------------
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        // ---- Edit Mode ----
+        setForm({
+          name: initialData.name ?? "",
+          displayName: initialData.displayName ?? "",
+          description: initialData.description ?? "",
+          icon: initialData.icon ?? TAG_ICONS[0],
+        });
+      } else {
+        // ---- Create Mode ----
+        setForm({
+          name: "",
+          displayName: "",
+          description: "",
+          icon: TAG_ICONS[0],
+        });
+      }
+    }
+  }, [open, initialData]);
+
+  // ------------------------
+  // Submit Logic
+  // ------------------------
   const onSubmit = async () => {
-    const res = await createTagGroup(form);
+    let res;
+
+    if (initialData?.id) {
+      // EDIT MODE
+      res = await updateTagGroup(initialData.id, form);
+    } else {
+      // CREATE MODE
+      res = await createTagGroup(form);
+    }
+
     if (res.success) {
       onOpenChange(false);
     }
   };
 
+  const isEdit = !!initialData;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Group</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Group" : "Create Group"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -85,7 +134,7 @@ export function CreateGroupDialog({
             />
           </div>
 
-          {/* Icon Grid */}
+          {/* Icon Picker */}
           <div>
             <Label>Icon</Label>
             <ScrollArea className="h-32 border rounded p-2">
@@ -95,7 +144,7 @@ export function CreateGroupDialog({
                   return (
                     <div
                       key={iconName}
-                      className={`p-1 rounded cursor-pointer border hover:bg-background flex items-center justify-center ${
+                      className={`p-1 rounded cursor-pointer border hover:bg-accent flex items-center justify-center ${
                         form.icon === iconName ? "ring-2 ring-blue-500" : ""
                       }`}
                       onClick={() => setForm({ ...form, icon: iconName })}
@@ -110,7 +159,9 @@ export function CreateGroupDialog({
         </div>
 
         <DialogFooter>
-          <Button onClick={onSubmit}>Create</Button>
+          <Button onClick={onSubmit}>
+            {isEdit ? "Save Changes" : "Create"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
